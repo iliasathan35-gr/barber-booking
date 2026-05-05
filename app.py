@@ -9,7 +9,6 @@ app.secret_key = "change_this_secret"
 FILE = "data.json"
 
 SERVICES = ["Κούρεμα", "Μούσι", "Κούρεμα + Μούσι"]
-
 ADMIN_PASSWORD = "1234"
 
 # --------------------
@@ -32,15 +31,13 @@ def save(data):
 def generate_slots(day):
     slots = []
 
-    # Κυριακή
-    if day == 6:
+    if day == 6:  # Κυριακή
         return []
 
-    # Σάββατο
-    if day == 5:
+    if day == 5:  # Σάββατο
         start_hour = 10
         end_hour = 14
-    else:
+    else:  # Δευτέρα - Παρασκευή
         start_hour = 11
         end_hour = 20
 
@@ -54,6 +51,18 @@ def generate_slots(day):
     return slots
 
 # --------------------
+# FREE SLOTS (hide booked)
+# --------------------
+def get_free_slots(data, day):
+    all_slots = generate_slots(day)
+
+    booked = set()
+    for d in data:
+        booked.add(d["time"].split(" ")[1])
+
+    return [s for s in all_slots if s not in booked]
+
+# --------------------
 # HOME
 # --------------------
 @app.route("/", methods=["GET", "POST"])
@@ -64,7 +73,6 @@ def index():
         name = request.form["name"]
         phone = request.form["phone"]
         service = request.form["service"]
-
         date = request.form["date"]
         time = request.form["time"]
 
@@ -72,33 +80,25 @@ def index():
 
         now = datetime.now()
 
-        # ❗ 15 λεπτά πριν rule
+        # 15 min rule
         if dt - now < timedelta(minutes=15):
             return "Δεν επιτρέπεται κράτηση λιγότερο από 15 λεπτά πριν 💈"
 
         day = dt.weekday()
 
-        # Κυριακή
         if day == 6:
             return "Κυριακή δεν λειτουργεί 💈"
 
-        # Σάββατο
         if day == 5 and (dt.hour < 10 or dt.hour >= 14):
             return "Σάββατο μόνο 10:00 - 14:00"
 
-        # Δευτέρα - Παρασκευή
         if day <= 4 and (dt.hour < 11 or dt.hour >= 20):
             return "Ωράριο 11:00 - 20:00"
 
-        new_start = dt
-        new_end = dt + timedelta(minutes=45)
-
         # overlap check
         for d in data:
-            existing_start = datetime.strptime(d["time"], "%Y-%m-%d %H:%M")
-            existing_end = existing_start + timedelta(minutes=45)
-
-            if new_start < existing_end and new_end > existing_start:
+            existing = datetime.strptime(d["time"], "%Y-%m-%d %H:%M")
+            if abs((existing - dt).total_seconds()) < 2700:  # 45min
                 return "Υπάρχει ήδη ραντεβού 💈"
 
         data.append({
@@ -114,7 +114,7 @@ def index():
     return render_template(
         "index.html",
         services=SERVICES,
-        slots=generate_slots(datetime.now().weekday())
+        slots=get_free_slots(load(), datetime.now().weekday())
     )
 
 # --------------------
@@ -131,7 +131,7 @@ def login():
     return render_template("login.html")
 
 # --------------------
-# ADMIN
+# ADMIN DASHBOARD
 # --------------------
 @app.route("/admin")
 def admin():
@@ -140,6 +140,22 @@ def admin():
 
     data = load()
     return render_template("admin.html", data=data)
+
+# --------------------
+# CANCEL
+# --------------------
+@app.route("/cancel/<int:index>")
+def cancel(index):
+    if not session.get("admin"):
+        return redirect("/login")
+
+    data = load()
+
+    if 0 <= index < len(data):
+        data.pop(index)
+        save(data)
+
+    return redirect("/admin")
 
 # --------------------
 # LOGOUT
