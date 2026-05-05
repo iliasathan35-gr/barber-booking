@@ -23,7 +23,7 @@ def save(data):
         json.dump(data, f, indent=4)
 
 # --------------------
-# TIME SLOTS (11:00 - 20:00)
+# SLOTS (11:00 - 20:00)
 # --------------------
 def generate_slots():
     slots = []
@@ -40,7 +40,7 @@ def generate_slots():
     return slots
 
 # --------------------
-# HOME (BOOKING)
+# HOME
 # --------------------
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -55,7 +55,6 @@ def index():
         new_start = datetime.strptime(time, "%Y-%m-%dT%H:%M")
         new_end = new_start + timedelta(minutes=45)
 
-        # overlap check
         for d in data:
             existing_start = datetime.strptime(d["time"], "%Y-%m-%dT%H:%M")
             existing_end = existing_start + timedelta(minutes=45)
@@ -88,14 +87,35 @@ def admin():
     return render_template("admin.html", data=data)
 
 # --------------------
-# SUCCESS PAGE
+# CANCEL (1 hour rule)
+# --------------------
+@app.route("/cancel/<int:index>")
+def cancel(index):
+    data = load()
+
+    if index < 0 or index >= len(data):
+        return "Λάθος ραντεβού"
+
+    appointment_time = datetime.strptime(data[index]["time"], "%Y-%m-%dT%H:%M")
+    now = datetime.now()
+
+    if appointment_time - now < timedelta(hours=1):
+        return "Δεν μπορεί να ακυρωθεί (λιγότερο από 1 ώρα πριν) ❌"
+
+    data.pop(index)
+    save(data)
+
+    return redirect("/admin")
+
+# --------------------
+# SUCCESS
 # --------------------
 @app.route("/success")
 def success():
     return "Το ραντεβού κλείστηκε! 💈"
 
 # --------------------
-# RUN (Render compatible)
+# RUN (Render ready)
 # --------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
