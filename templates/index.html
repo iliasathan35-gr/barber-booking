@@ -49,7 +49,6 @@ button.submit {
     color: black;
     font-size: 16px;
     text-align: left;
-    margin: 8px 0;
 }
 
 .slots {
@@ -90,7 +89,7 @@ button.submit {
     {% endfor %}
 </select>
 
-<!-- 🔥 DATE BUTTON -->
+<!-- 📅 DATE BUTTON -->
 <label>📅 Ημερομηνία</label>
 
 <button type="button" class="date-btn" onclick="openDate()" id="dateBtn">
@@ -99,8 +98,8 @@ button.submit {
 
 <input type="date" name="date" id="realDate" required style="display:none;">
 
-<!-- 🔥 HOURS -->
-<h3>🕒 Διάλεξε Ώρα</h3>
+<!-- 🕒 HOURS -->
+<h3>🕒 Ώρες</h3>
 
 <div class="slots">
 {% for s in slots %}
@@ -140,6 +139,20 @@ function selectTime(time, el){
 
     el.classList.add("selected");
 }
+
+/* 🔥 LIMIT 7 DAYS FRONTEND */
+document.addEventListener("DOMContentLoaded", function(){
+    let input = document.getElementById("realDate");
+
+    let today = new Date();
+    let max = new Date();
+    max.setDate(today.getDate() + 7);
+
+    let format = (d) => d.toISOString().split("T")[0];
+
+    input.min = format(today);
+    input.max = format(max);
+});
 </script>
 
 </body>
