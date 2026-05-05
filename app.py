@@ -150,7 +150,7 @@ def logout():
 # --------------------
 @app.route("/success")
 def success():
-    return "OK 💈"
+    return "✅ Επιτυχία! Το ραντεβού σου καταχωρήθηκε."
 
 # --------------------
 # RUN
