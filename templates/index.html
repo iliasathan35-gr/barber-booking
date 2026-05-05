@@ -17,7 +17,11 @@
         {% endfor %}
     </select><br><br>
 
-    <input type="datetime-local" name="time" id="timeInput" required>
+    <select name="time" required>
+    {% for slot in slots %}
+        <option value="{{ slot }}">{{ slot }}</option>
+    {% endfor %}
+</select>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
