@@ -11,10 +11,6 @@ body {
     padding: 10px;
 }
 
-h2 {
-    text-align: center;
-}
-
 form {
     max-width: 400px;
     margin: auto;
@@ -24,9 +20,9 @@ input, select {
     width: 100%;
     padding: 12px;
     margin: 8px 0;
-    font-size: 16px;
     border-radius: 8px;
     border: none;
+    font-size: 16px;
 }
 
 button {
@@ -37,7 +33,6 @@ button {
     color: white;
     font-size: 16px;
     border-radius: 8px;
-    margin-top: 10px;
 }
 
 .slots {
@@ -47,12 +42,19 @@ button {
     margin: 10px 0;
 }
 
-.slot {
-    padding: 8px;
+.slot-btn {
+    padding: 10px;
     background: #333;
     border-radius: 8px;
-    font-size: 12px;
+    cursor: pointer;
+    border: none;
+    color: white;
 }
+
+.slot-btn.selected {
+    background: #00c853;
+}
+
 </style>
 
 </head>
@@ -61,7 +63,7 @@ button {
 
 <h2>💈 Κλείσε Ραντεβού</h2>
 
-<form method="POST">
+<form method="POST" id="bookingForm">
 
 <input name="name" placeholder="Όνομα" required>
 <input name="phone" placeholder="Τηλέφωνο" required>
@@ -74,20 +76,36 @@ button {
 </select>
 
 <input type="date" name="date" required>
-<input type="time" name="time" required>
 
-<h3>🕒 Ώρες (ενδεικτικές)</h3>
+<h3>🕒 Διάλεξε Ώρα</h3>
 
 <div class="slots">
 {% for s in slots %}
-    <div class="slot">{{ s }}</div>
+    <button type="button" class="slot-btn" onclick="selectTime('{{ s }}', this)">
+        {{ s }}
+    </button>
 {% endfor %}
 </div>
 
-<!-- 🔥 ΜΟΝΟ ΑΥΤΟ κάνει submit -->
+<!-- hidden field -->
+<input type="hidden" name="time" id="timeInput">
+
 <button type="submit">💈 Κλείσε ραντεβού</button>
 
 </form>
+
+<script>
+function selectTime(time, el) {
+    document.getElementById("timeInput").value = time;
+
+    // reset buttons
+    document.querySelectorAll(".slot-btn").forEach(b => {
+        b.classList.remove("selected");
+    });
+
+    el.classList.add("selected");
+}
+</script>
 
 </body>
 </html>
