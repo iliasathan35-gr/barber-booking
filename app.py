@@ -123,10 +123,20 @@ def admin():
     if not session.get("admin"):
         return redirect("/login")
 
+    data = load()
+
+    booked_times = []
+    for d in data:
+        dt = datetime.strptime(d["time"], "%Y-%m-%d %H:%M")
+        booked_times.append(dt.strftime("%H:%M"))
+
+    slots = generate_slots(datetime.now().weekday())
+
     return render_template(
         "admin.html",
-        data=load(),
-        slots=generate_slots(datetime.now().weekday())
+        data=data,
+        slots=slots,
+        booked=booked_times
     )
 
 # ---------------- CANCEL ----------------
