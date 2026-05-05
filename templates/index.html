@@ -3,43 +3,46 @@
 <head>
     <title>Barber Booking</title>
 </head>
+
 <body>
 
 <h1>Κλείσε Ραντεβού 💈</h1>
 
 <form method="POST">
-    <input name="name" placeholder="Όνομα Επώνυμο" required><br><br>
-    <input name="phone" placeholder="Τηλέφωνο" required><br><br>
 
-    <select name="service">
+    <!-- ΟΝΟΜΑ -->
+    <input type="text" name="name" placeholder="Όνομα Επώνυμο" required>
+    <br><br>
+
+    <!-- ΤΗΛΕΦΩΝΟ -->
+    <input type="text" name="phone" placeholder="Τηλέφωνο" required>
+    <br><br>
+
+    <!-- ΥΠΗΡΕΣΙΑ -->
+    <select name="service" required>
         {% for s in services %}
-        <option>{{ s }}</option>
+            <option value="{{ s }}">{{ s }}</option>
         {% endfor %}
-    </select><br><br>
+    </select>
+    <br><br>
 
+    <!-- ΗΜΕΡΟΜΗΝΙΑ -->
+    <label>Ημερομηνία:</label>
+    <input type="date" name="date" required>
+    <br><br>
+
+    <!-- ΩΡΑ (45min slots) -->
+    <label>Ώρα:</label>
     <select name="time" required>
-    {% for slot in slots %}
-        <option value="{{ slot }}">{{ slot }}</option>
-    {% endfor %}
-</select>
+        {% for slot in slots %}
+            <option value="{{ slot }}">{{ slot }}</option>
+        {% endfor %}
+    </select>
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const input = document.getElementById("timeInput");
+    <br><br>
 
-    input.addEventListener("change", function () {
-        const selectedDate = new Date(this.value);
-        const day = selectedDate.getDay(); // 0 = Κυριακή
+    <button type="submit">Κλείσε Ραντεβού</button>
 
-        if (day === 0) {
-            alert("❌ Κυριακή δεν δεχόμαστε ραντεβού");
-            this.value = "";
-        }
-    });
-});
-</script>
-
-    <button>Κλείσε</button>
 </form>
 
 </body>
