@@ -60,7 +60,7 @@ def generate_slots(day):
 def index():
     data = load()
 
-  if request.method == "POST":
+ if request.method == "POST":
 
     name = request.form.get("name")
     phone = request.form.get("phone")
@@ -69,10 +69,11 @@ def index():
 
     if not date or not time:
         return "❌ Επίλεξε ημερομηνία και ώρα"
-        try:
-            dt = datetime.strptime(date + " " + time, "%Y-%m-%d %H:%M")
-        except:
-            return "❌ Λάθος ημερομηνία ή ώρα"
+
+    try:
+        dt = datetime.strptime(date + " " + time, "%Y-%m-%d %H:%M")
+    except:
+        return "❌ Λάθος ημερομηνία ή ώρα"
 
         now = datetime.now()
 
