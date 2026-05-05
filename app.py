@@ -4,7 +4,7 @@ import os
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
-app.secret_key = "change_this_secret_key"
+app.secret_key = "secret_key_change_me"
 
 FILE = "data.json"
 
@@ -33,11 +33,9 @@ def generate_slots(day):
         return []
 
     if day == 5:
-        start = 10
-        end = 14
+        start, end = 10, 14
     else:
-        start = 11
-        end = 20
+        start, end = 11, 20
 
     slots = []
     current = datetime(2000, 1, 1, start, 0)
@@ -48,14 +46,6 @@ def generate_slots(day):
         current += timedelta(minutes=45)
 
     return slots
-
-# --------------------
-# FREE SLOTS
-# --------------------
-def get_free_slots(data, day):
-    all_slots = generate_slots(day)
-    booked = {d["time"].split(" ")[1] for d in data}
-    return [s for s in all_slots if s not in booked]
 
 # --------------------
 # HOME
@@ -74,27 +64,24 @@ def index():
         dt = datetime.strptime(date + " " + time, "%Y-%m-%d %H:%M")
         now = datetime.now()
 
-        # ❗ 15 λεπτά πριν rule
         if dt - now < timedelta(minutes=15):
-            return "Δεν επιτρέπεται κράτηση λιγότερο από 15 λεπτά πριν 💈"
+            return "Δεν επιτρέπεται κράτηση <15 λεπτά πριν 💈"
 
         day = dt.weekday()
 
         if day == 6:
-            return "Κυριακή κλειστά 💈"
+            return "Κυριακή κλειστά"
 
         if day == 5 and (dt.hour < 10 or dt.hour >= 14):
-            return "Σάββατο 10:00 - 14:00"
+            return "Σάββατο 10-14"
 
         if day <= 4 and (dt.hour < 11 or dt.hour >= 20):
-            return "Ωράριο 11:00 - 20:00"
+            return "11-20"
 
-        # overlap check
         for d in data:
             existing = datetime.strptime(d["time"], "%Y-%m-%d %H:%M")
-
             if abs((existing - dt).total_seconds()) < 2700:
-                return "Υπάρχει ήδη ραντεβού 💈"
+                return "Ήδη κλεισμένο"
 
         data.append({
             "name": name,
@@ -109,7 +96,7 @@ def index():
     return render_template(
         "index.html",
         services=SERVICES,
-        slots=get_free_slots(load(), datetime.now().weekday())
+        slots=generate_slots(datetime.now().weekday())
     )
 
 # --------------------
@@ -144,7 +131,6 @@ def cancel(index):
         return redirect("/login")
 
     data = load()
-
     if 0 <= index < len(data):
         data.pop(index)
         save(data)
@@ -164,7 +150,7 @@ def logout():
 # --------------------
 @app.route("/success")
 def success():
-    return "Το ραντεβού κλείστηκε 💈"
+    return "OK 💈"
 
 # --------------------
 # RUN
