@@ -11,134 +11,55 @@ body {
     padding: 10px;
 }
 
-h2, h3 {
-    text-align: center;
-}
-
-.logout {
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-.logout a {
-    color: #ff5252;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.card {
-    background: #222;
-    padding: 15px;
-    margin: 15px 0;
-    border-radius: 12px;
-}
-
-input, select {
-    width: 100%;
+.day {
+    margin-bottom: 20px;
+    background: #1c1c1c;
     padding: 10px;
-    margin: 5px 0;
-    font-size: 14px;
-    border-radius: 8px;
-    border: none;
-}
-
-button {
-    width: 100%;
-    padding: 10px;
-    background: #00c853;
-    border: none;
-    color: white;
-    font-size: 14px;
-    border-radius: 8px;
-}
-
-.delete {
-    display: inline-block;
-    margin-top: 10px;
-    color: red;
-    font-weight: bold;
-}
-
-.slots {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-    margin-bottom: 15px;
+    border-radius: 10px;
 }
 
 .slot {
     padding: 8px;
-    border-radius: 8px;
-    min-width: 60px;
-    text-align: center;
-    font-size: 12px;
+    margin: 4px 0;
+    border-radius: 6px;
+    background: #2a2a2a;
+}
+
+.booked {
+    background: #00c853;
+    color: black;
 }
 </style>
-
 </head>
 
 <body>
 
-<h2>💈 Admin Panel</h2>
+<h2>📅 Admin Panel</h2>
 
-<div class="logout">
-    <a href="/logout">🚪 Logout</a>
-</div>
+<a href="/logout">Logout</a>
 
-<h3>🕒 Ώρες Σήμερα</h3>
+{% for day in days %}
+<div class="day">
 
-<div class="slots">
-{% for s in slots %}
+<h3>{{ day.date }}</h3>
 
-    {% if s in booked %}
-        <div class="slot" style="background:red;">
-            {{ s }} ❌
+{% if day.slots %}
+    {% for s in day.slots %}
+        <div class="slot {% if s.booking %}booked{% endif %}">
+            {{ s.time }} -
+
+            {% if s.booking %}
+                {{ s.booking.name }} ({{ s.booking.phone }})
+            {% else %}
+                Κενό
+            {% endif %}
         </div>
-    {% else %}
-        <div class="slot" style="background:green;">
-            {{ s }} ✔
-        </div>
-    {% endif %}
-
-{% endfor %}
-</div>
-
-<hr>
-
-{% for d in data %}
-
-<div class="card">
-
-<form method="POST" action="/admin/edit/{{ loop.index0 }}">
-
-<label>Όνομα</label>
-<input name="name" value="{{ d.name }}" required>
-
-<label>Τηλέφωνο</label>
-<input name="phone" value="{{ d.phone }}" required>
-
-<label>Υπηρεσία</label>
-<select name="service">
-<option {% if d.service == "Κούρεμα" %}selected{% endif %}>Κούρεμα</option>
-<option {% if d.service == "Μούσι" %}selected{% endif %}>Μούσι</option>
-<option {% if d.service == "Κούρεμα + Μούσι" %}selected{% endif %}>Κούρεμα + Μούσι</option>
-</select>
-
-<label>Ημερομηνία</label>
-<input type="date" name="date" required>
-
-<label>Ώρα</label>
-<input type="time" name="time" required>
-
-<button type="submit">💾 Save</button>
-
-</form>
-
-<a class="delete" href="/cancel/{{ loop.index0 }}">🗑 Delete</a>
+    {% endfor %}
+{% else %}
+    <p>Κλειστά</p>
+{% endif %}
 
 </div>
-
 {% endfor %}
 
 </body>
