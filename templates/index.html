@@ -11,46 +11,86 @@ body {
     color: white;
 }
 
-/* FULL SCREEN APP STYLE */
+/* container */
 .container {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     padding: 20px;
 }
 
+/* title */
 h2 {
-    font-size: 32px;
     text-align: center;
-    margin-bottom: 20px;
+    font-size: 28px;
 }
 
-/* INPUTS FULL WIDTH + BIG */
+/* inputs */
 input, select {
     width: 100%;
-    font-size: 22px;
+    font-size: 20px;
     padding: 15px;
     margin: 10px 0;
     border-radius: 10px;
     border: none;
 }
 
-/* BIG BUTTON */
-button {
-    width: 100%;
-    font-size: 24px;
-    padding: 18px;
+/* services */
+select {
+    background: #222;
+    color: white;
+}
+
+/* days (swipe) */
+#days {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.day-btn {
+    min-width: 110px;
+    padding: 15px;
+    font-size: 16px;
+    border-radius: 10px;
+    border: none;
+    background: #333;
+    color: white;
+}
+
+.day-btn.active {
+    background: #00c853;
+}
+
+/* time buttons */
+#times {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
     margin-top: 10px;
+}
+
+.time-btn {
+    padding: 15px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+    background: #333;
+    color: white;
+}
+
+.time-btn.active {
+    background: #00c853;
+}
+
+/* button */
+button.submit {
+    width: 100%;
+    font-size: 22px;
+    padding: 18px;
+    margin-top: 20px;
     background: #00c853;
     color: white;
     border: none;
     border-radius: 12px;
-}
-
-/* REMOVE SMALL FEEL */
-option {
-    font-size: 18px;
 }
 </style>
 </head>
@@ -59,12 +99,12 @@ option {
 
 <div class="container">
 
-<h2>💈 Κράτηση</h2>
+<h2>💈 Κλείσε Ραντεβού</h2>
 
 <form method="POST">
 
-<input name="name" placeholder="ΟΝΟΜΑΤΕΠΩΝΥΜΟ">
-<input name="phone" placeholder="ΤΗΛΕΦΩΝΟ">
+<input name="name" placeholder="Ονοματεπώνυμο" required>
+<input name="phone" placeholder="Τηλέφωνο" required>
 
 <select name="service">
 {% for s in services %}
@@ -72,19 +112,59 @@ option {
 {% endfor %}
 </select>
 
-<input type="date" name="date">
+<!-- DAYS -->
+<div id="days"></div>
+<input type="hidden" name="date" id="selectedDate" required>
 
-<select name="time">
+<!-- TIMES -->
+<div id="times">
 {% for t in slots %}
-<option>{{ t }}</option>
+<button type="button" class="time-btn" onclick="selectTime(event, '{{ t }}')">
+{{ t }}
+</button>
 {% endfor %}
-</select>
+</div>
 
-<button>ΚΛΕΙΣΕ ΡΑΝΤΕΒΟΥ</button>
+<input type="hidden" name="time" id="selectedTime" required>
+
+<button class="submit">ΚΛΕΙΣΕ ΡΑΝΤΕΒΟΥ</button>
 
 </form>
 
 </div>
+
+<script>
+// SELECT TIME
+function selectTime(e, t) {
+    document.getElementById("selectedTime").value = t;
+
+    document.querySelectorAll(".time-btn").forEach(b => b.classList.remove("active"));
+    e.target.classList.add("active");
+}
+
+// CREATE DAYS (7 days swipe)
+const daysDiv = document.getElementById("days");
+
+for (let i = 0; i < 7; i++) {
+    let d = new Date();
+    d.setDate(d.getDate() + i);
+
+    let dateStr = d.toISOString().split("T")[0];
+
+    let btn = document.createElement("button");
+    btn.innerText = dateStr;
+    btn.className = "day-btn";
+
+    btn.onclick = () => {
+        document.getElementById("selectedDate").value = dateStr;
+
+        document.querySelectorAll(".day-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+    };
+
+    daysDiv.appendChild(btn);
+}
+</script>
 
 </body>
 </html>
