@@ -180,6 +180,33 @@ def slots_api():
 def success():
     return render_template("success.html")
 
+# ---------------- LOGIN ----------------
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        if request.form.get("password") == "admin":
+            session["admin"] = True
+            return redirect("/admin")
+        return "❌ Λάθος password"
+
+    return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/login")
+
+
+# ---------------- ADMIN ----------------
+@app.route("/admin")
+def admin():
+    if not session.get("admin"):
+        return redirect("/login")
+
+    data = load()
+    return render_template("admin.html", data=data)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
