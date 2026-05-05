@@ -26,11 +26,31 @@ def save(data):
 def index():
     data = load()
 
-    if request.method == "POST":
-        name = request.form["name"]
-        phone = request.form["phone"]
-        time = request.form["time"]
-        service = request.form["service"]
+   if request.method == "POST":
+    name = request.form["name"]
+    phone = request.form["phone"]
+    time = request.form["time"]
+    service = request.form["service"]
+
+    new_start = datetime.strptime(time, "%Y-%m-%dT%H:%M")
+    new_end = new_start + timedelta(minutes=45)
+
+    for d in data:
+        existing_start = datetime.strptime(d["time"], "%Y-%m-%dT%H:%M")
+        existing_end = existing_start + timedelta(minutes=45)
+
+        if new_start < existing_end and new_end > existing_start:
+            return "Υπάρχει ήδη ραντεβού σε αυτό το χρονικό διάστημα 💈"
+
+    data.append({
+        "name": name,
+        "phone": phone,
+        "time": time,
+        "service": service
+    })
+
+    save(data)
+    return redirect("/success")
 
         for d in data:
             if d["time"] == time:
