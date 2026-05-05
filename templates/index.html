@@ -1,49 +1,22 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Barber Booking</title>
-</head>
-
-<body>
-
-<h1>Κλείσε Ραντεβού 💈</h1>
+<h2>Book Appointment 💈</h2>
 
 <form method="POST">
+    <input name="name" placeholder="Όνομα">
+    <input name="phone" placeholder="Τηλέφωνο">
 
-    <!-- ΟΝΟΜΑ -->
-    <input type="text" name="name" placeholder="Όνομα Επώνυμο" required>
-    <br><br>
-
-    <!-- ΤΗΛΕΦΩΝΟ -->
-    <input type="text" name="phone" placeholder="Τηλέφωνο" required>
-    <br><br>
-
-    <!-- ΥΠΗΡΕΣΙΑ -->
-    <select name="service" required>
+    <select name="service">
         {% for s in services %}
-            <option value="{{ s }}">{{ s }}</option>
-        {% endfor %}
-    </select>
-    <br><br>
-
-    <!-- ΗΜΕΡΟΜΗΝΙΑ -->
-    <label>Ημερομηνία:</label>
-    <input type="date" name="date" required>
-    <br><br>
-
-    <!-- ΩΡΑ (45min slots) -->
-    <label>Ώρα:</label>
-    <select name="time" required>
-        {% for slot in slots %}
-            <option value="{{ slot }}">{{ slot }}</option>
+        <option>{{ s }}</option>
         {% endfor %}
     </select>
 
-    <br><br>
+    <input type="date" name="date">
 
-    <button type="submit">Κλείσε Ραντεβού</button>
+    <select name="time">
+        {% for s in slots %}
+        <option>{{ s }}</option>
+        {% endfor %}
+    </select>
 
+    <button>Κράτηση</button>
 </form>
-
-</body>
-</html>
