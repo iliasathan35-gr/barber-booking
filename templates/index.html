@@ -17,7 +17,23 @@
         {% endfor %}
     </select><br><br>
 
-    <input type="datetime-local" name="time" required><br><br>
+    <input type="datetime-local" name="time" id="timeInput" required>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const input = document.getElementById("timeInput");
+
+    input.addEventListener("change", function () {
+        const selectedDate = new Date(this.value);
+        const day = selectedDate.getDay(); // 0 = Κυριακή
+
+        if (day === 0) {
+            alert("❌ Κυριακή δεν δεχόμαστε ραντεβού");
+            this.value = "";
+        }
+    });
+});
+</script>
 
     <button>Κλείσε</button>
 </form>
