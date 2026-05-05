@@ -123,7 +123,11 @@ def admin():
     if not session.get("admin"):
         return redirect("/login")
 
-    return render_template("admin.html", data=load())
+    return render_template(
+        "admin.html",
+        data=load(),
+        slots=generate_slots(datetime.now().weekday())
+    )
 
 # ---------------- CANCEL ----------------
 @app.route("/cancel/<int:index>")
