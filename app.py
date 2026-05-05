@@ -36,11 +36,22 @@ def send_telegram(text):
         pass
 
 
-# ---------------- SLOTS (45 min) ----------------
-def generate_slots():
+# ---------------- SLOTS ----------------
+def generate_slots(day):
     slots = []
-    start = datetime(2000, 1, 1, 10, 0)
-    end = datetime(2000, 1, 1, 20, 0)
+
+    # Κυριακή κλειστά
+    if day == 6:
+        return []
+
+    # Σάββατο
+    if day == 5:
+        start = datetime(2000, 1, 1, 10, 0)
+        end = datetime(2000, 1, 1, 14, 0)
+    else:
+        # Καθημερινές
+        start = datetime(2000, 1, 1, 11, 0)
+        end = datetime(2000, 1, 1, 20, 0)
 
     while start <= end:
         slots.append(start.strftime("%H:%M"))
@@ -52,7 +63,7 @@ def generate_slots():
 SERVICES = ["Κούρεμα", "Μούσι", "Κούρεμα + Μούσι"]
 
 
-# ---------------- HOME (BOOKING) ----------------
+# ---------------- HOME ----------------
 @app.route("/", methods=["GET", "POST"])
 def index():
     data = load()
@@ -76,15 +87,19 @@ def index():
         now = datetime.now()
         max_date = now + timedelta(days=7)
 
-        # 🔥 LIMIT 7 DAYS
-        if dt > max_date:
-            return "❌ Μπορείς να κλείσεις μόνο έως 7 μέρες μπροστά"
+        # ❌ Κυριακή
+        if dt.weekday() == 6:
+            return "❌ Κυριακή είμαστε κλειστά"
 
-        # 🔥 MIN 15 MIN RULE
+        # ❌ πάνω από 7 μέρες
+        if dt > max_date:
+            return "❌ Μόνο έως 7 μέρες μπροστά"
+
+        # ❌ 15 λεπτά πριν
         if dt - now < timedelta(minutes=15):
             return "❌ Δεν επιτρέπεται κράτηση <15 λεπτά πριν"
 
-        # 🔥 OVERLAP CHECK
+        # ❌ overlap
         for d in data:
             try:
                 existing = datetime.strptime(d["time"], "%Y-%m-%d %H:%M")
@@ -94,7 +109,6 @@ def index():
             if abs((existing - dt).total_seconds()) < 2700:
                 return "❌ Ώρα κατειλημμένη"
 
-        # SAVE
         data.append({
             "name": name,
             "phone": phone,
@@ -104,14 +118,16 @@ def index():
 
         save(data)
 
-        # TELEGRAM
         send_telegram(
             f"💈 ΝΕΟ ΡΑΝΤΕΒΟΥ!\n{name}\n{phone}\n{service}\n{date} {time}"
         )
 
         return redirect("/success")
 
-    # AVAILABLE SLOTS
+    # default slots (σήμερα)
+    today = datetime.now()
+    slots = generate_slots(today.weekday())
+
     booked = []
     for d in data:
         try:
@@ -120,126 +136,49 @@ def index():
         except:
             pass
 
-    available_slots = [s for s in generate_slots() if s not in booked]
+    available = [s for s in slots if s not in booked]
 
     return render_template(
         "index.html",
         services=SERVICES,
-        slots=available_slots
+        slots=available
     )
 
 
-# ---------------- ADMIN ----------------
-@app.route("/admin")
-def admin():
-    if not session.get("admin"):
-        return redirect("/login")
-
+# ---------------- API (για dynamic slots) ----------------
+@app.route("/slots")
+def slots_api():
+    date = request.args.get("date")
     data = load()
-
-    return render_template("admin.html", data=data, slots=generate_slots())
-
-
-# ---------------- EDIT ----------------
-@app.route("/admin/edit/<int:index>", methods=["POST"])
-def edit(index):
-    if not session.get("admin"):
-        return redirect("/login")
-
-    data = load()
-
-    name = request.form.get("name")
-    phone = request.form.get("phone")
-    service = request.form.get("service")
-    date = request.form.get("date")
-    time = request.form.get("time")
 
     try:
-        dt = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M")
+        dt = datetime.strptime(date, "%Y-%m-%d")
     except:
-        return "❌ Λάθος ημερομηνία ή ώρα"
+        return jsonify([])
 
-    now = datetime.now()
-    max_date = now + timedelta(days=7)
+    if dt.weekday() == 6:
+        return jsonify([])
 
-    if dt > max_date:
-        return "❌ Μόνο έως 7 μέρες μπροστά"
+    slots = generate_slots(dt.weekday())
 
-    for i, d in enumerate(data):
-        if i == index:
-            continue
-
+    booked = []
+    for d in data:
         try:
             existing = datetime.strptime(d["time"], "%Y-%m-%d %H:%M")
+            if existing.strftime("%Y-%m-%d") == date:
+                booked.append(existing.strftime("%H:%M"))
         except:
-            continue
+            pass
 
-        if abs((existing - dt).total_seconds()) < 2700:
-            return "❌ Ώρα κατειλημμένη"
+    available = [s for s in slots if s not in booked]
 
-    data[index] = {
-        "name": name,
-        "phone": phone,
-        "service": service,
-        "time": f"{date} {time}"
-    }
-
-    save(data)
-    return redirect("/admin")
-
-
-# ---------------- DELETE ----------------
-@app.route("/cancel/<int:index>")
-def cancel(index):
-    data = load()
-
-    if 0 <= index < len(data):
-        data.pop(index)
-        save(data)
-
-    return redirect("/admin")
-
-
-# ---------------- LOGIN ----------------
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        if request.form["password"] == "admin":
-            session["admin"] = True
-            return redirect("/admin")
-        return "❌ Λάθος password"
-
-    return render_template("login.html")
-
-
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect("/login")
+    return jsonify(available)
 
 
 # ---------------- SUCCESS ----------------
 @app.route("/success")
 def success():
     return render_template("success.html")
-
-
-# ---------------- API ----------------
-@app.route("/slots")
-def slots_api():
-    data = load()
-
-    booked = []
-    for d in data:
-        try:
-            dt = datetime.strptime(d["time"], "%Y-%m-%d %H:%M")
-            booked.append(dt.strftime("%H:%M"))
-        except:
-            pass
-
-    available = [s for s in generate_slots() if s not in booked]
-
-    return jsonify(available)
 
 
 if __name__ == "__main__":
