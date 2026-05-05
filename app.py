@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, jsonify
 from datetime import datetime, timedelta
 import json
 
@@ -8,7 +8,7 @@ app.secret_key = "secret123"
 DATA_FILE = "data.json"
 
 
-# ---------- DATA ----------
+# ---------------- DATA ----------------
 def load():
     try:
         with open(DATA_FILE, "r") as f:
@@ -22,7 +22,7 @@ def save(data):
         json.dump(data, f, indent=2)
 
 
-# ---------- TELEGRAM (optional) ----------
+# ---------------- TELEGRAM ----------------
 def send_telegram(text):
     try:
         import requests
@@ -36,20 +36,16 @@ def send_telegram(text):
         pass
 
 
-# ---------- SLOTS ----------
-def generate_slots(day):
+# ---------------- SLOTS (45 min) ----------------
+def generate_slots():
     slots = []
-    
-    start_hour = 10
-    end_hour = 20
 
-    current = datetime(2000, 1, 1, start_hour, 0)
+    start = datetime(2000, 1, 1, 10, 0)
+    end = datetime(2000, 1, 1, 20, 0)
 
-    end = datetime(2000, 1, 1, end_hour, 0)
-
-    while current <= end:
-        slots.append(current.strftime("%H:%M"))
-        current += timedelta(minutes=45)
+    while start <= end:
+        slots.append(start.strftime("%H:%M"))
+        start += timedelta(minutes=45)
 
     return slots
 
@@ -57,7 +53,7 @@ def generate_slots(day):
 SERVICES = ["Κούρεμα", "Μούσι", "Κούρεμα + Μούσι"]
 
 
-# ---------- INDEX (BOOKING) ----------
+# ---------------- HOME / BOOKING ----------------
 @app.route("/", methods=["GET", "POST"])
 def index():
     data = load()
@@ -70,7 +66,6 @@ def index():
         date = request.form.get("date")
         time = request.form.get("time")
 
-        # safety check
         if not name or not phone or not date or not time:
             return "❌ Συμπλήρωσε όλα τα πεδία"
 
@@ -81,11 +76,9 @@ def index():
 
         now = datetime.now()
 
-        # 15 min rule
         if dt - now < timedelta(minutes=15):
-            return "Δεν επιτρέπεται κράτηση <15 λεπτά πριν 💈"
+            return "❌ Δεν επιτρέπεται κράτηση <15 λεπτά πριν"
 
-        # overlap check
         for d in data:
             try:
                 existing = datetime.strptime(d["time"], "%Y-%m-%d %H:%M")
@@ -93,9 +86,8 @@ def index():
                 continue
 
             if abs((existing - dt).total_seconds()) < 2700:
-                return "Ώρα κατειλημμένη 💈"
+                return "❌ Ώρα κατειλημμένη"
 
-        # save
         data.append({
             "name": name,
             "phone": phone,
@@ -105,25 +97,33 @@ def index():
 
         save(data)
 
-        # telegram
         send_telegram(
             f"💈 ΝΕΟ ΡΑΝΤΕΒΟΥ!\n"
-            f"Όνομα: {name}\n"
-            f"Τηλ: {phone}\n"
-            f"Υπηρεσία: {service}\n"
-            f"Ώρα: {date} {time}"
+            f"{name}\n{phone}\n{service}\n{date} {time}"
         )
 
         return redirect("/success")
 
+    # booked slots
+    booked = []
+    for d in data:
+        try:
+            dt = datetime.strptime(d["time"], "%Y-%m-%d %H:%M")
+            booked.append(dt.strftime("%H:%M"))
+        except:
+            pass
+
+    all_slots = generate_slots()
+    available_slots = [s for s in all_slots if s not in booked]
+
     return render_template(
         "index.html",
         services=SERVICES,
-        slots=generate_slots(datetime.now().weekday())
+        slots=available_slots
     )
 
 
-# ---------- ADMIN ----------
+# ---------------- ADMIN ----------------
 @app.route("/admin")
 def admin():
     if not session.get("admin"):
@@ -142,14 +142,14 @@ def admin():
     return render_template(
         "admin.html",
         data=data,
-        slots=generate_slots(datetime.now().weekday()),
+        slots=generate_slots(),
         booked=booked
     )
 
 
-# ---------- EDIT ----------
+# ---------------- EDIT ----------------
 @app.route("/admin/edit/<int:index>", methods=["POST"])
-def admin_edit(index):
+def edit(index):
     if not session.get("admin"):
         return redirect("/login")
 
@@ -179,7 +179,7 @@ def admin_edit(index):
             continue
 
         if abs((existing - dt).total_seconds()) < 2700:
-            return "Ώρα κατειλημμένη 💈"
+            return "❌ Ώρα κατειλημμένη"
 
     data[index] = {
         "name": name,
@@ -192,7 +192,7 @@ def admin_edit(index):
     return redirect("/admin")
 
 
-# ---------- DELETE ----------
+# ---------------- DELETE ----------------
 @app.route("/cancel/<int:index>")
 def cancel(index):
     data = load()
@@ -204,7 +204,7 @@ def cancel(index):
     return redirect("/admin")
 
 
-# ---------- LOGIN ----------
+# ---------------- LOGIN ----------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -222,10 +222,29 @@ def logout():
     return redirect("/login")
 
 
-# ---------- SUCCESS ----------
+# ---------------- SUCCESS ----------------
 @app.route("/success")
 def success():
     return render_template("success.html")
+
+
+# ---------------- API (optional realtime) ----------------
+@app.route("/slots")
+def slots_api():
+    data = load()
+
+    booked = []
+    for d in data:
+        try:
+            dt = datetime.strptime(d["time"], "%Y-%m-%d %H:%M")
+            booked.append(dt.strftime("%H:%M"))
+        except:
+            pass
+
+    all_slots = generate_slots()
+    available = [s for s in all_slots if s not in booked]
+
+    return jsonify(available)
 
 
 if __name__ == "__main__":
