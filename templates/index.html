@@ -5,166 +5,89 @@
 
 <style>
 body {
-    margin: 0;
     font-family: Arial;
     background: #111;
     color: white;
+    padding: 10px;
 }
 
-/* container */
-.container {
-    padding: 20px;
-}
-
-/* title */
 h2 {
     text-align: center;
-    font-size: 28px;
 }
 
-/* inputs */
+form {
+    max-width: 400px;
+    margin: auto;
+}
+
 input, select {
     width: 100%;
-    font-size: 20px;
-    padding: 15px;
-    margin: 10px 0;
-    border-radius: 10px;
-    border: none;
-}
-
-/* services */
-select {
-    background: #222;
-    color: white;
-}
-
-/* days (swipe) */
-#days {
-    display: flex;
-    overflow-x: auto;
-    gap: 10px;
-    margin: 15px 0;
-}
-
-.day-btn {
-    min-width: 110px;
-    padding: 15px;
+    padding: 12px;
+    margin: 8px 0;
     font-size: 16px;
-    border-radius: 10px;
+    border-radius: 8px;
     border: none;
-    background: #333;
-    color: white;
 }
 
-.day-btn.active {
+button {
+    width: 100%;
+    padding: 14px;
     background: #00c853;
-}
-
-/* time buttons */
-#times {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 8px;
     margin-top: 10px;
 }
 
-.time-btn {
-    padding: 15px;
-    font-size: 18px;
-    border-radius: 10px;
-    border: none;
+.slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+.slot {
+    padding: 8px;
     background: #333;
-    color: white;
-}
-
-.time-btn.active {
-    background: #00c853;
-}
-
-/* button */
-button.submit {
-    width: 100%;
-    font-size: 22px;
-    padding: 18px;
-    margin-top: 20px;
-    background: #00c853;
-    color: white;
-    border: none;
-    border-radius: 12px;
+    border-radius: 8px;
+    font-size: 12px;
 }
 </style>
+
 </head>
 
 <body>
-
-<div class="container">
 
 <h2>💈 Κλείσε Ραντεβού</h2>
 
 <form method="POST">
 
-<input name="name" placeholder="Ονοματεπώνυμο" required>
+<input name="name" placeholder="Όνομα" required>
 <input name="phone" placeholder="Τηλέφωνο" required>
 
-<select name="service">
-{% for s in services %}
-<option>{{ s }}</option>
-{% endfor %}
+<select name="service" required>
+    <option value="">Επιλογή υπηρεσίας</option>
+    {% for s in services %}
+        <option value="{{ s }}">{{ s }}</option>
+    {% endfor %}
 </select>
 
-<!-- DAYS -->
-<div id="days"></div>
-<input type="hidden" name="date" id="selectedDate" required>
+<input type="date" name="date" required>
+<input type="time" name="time" required>
 
-<!-- TIMES -->
-<div id="times">
-{% for t in slots %}
-<button type="button" class="time-btn" onclick="selectTime(event, '{{ t }}')">
-{{ t }}
-</button>
+<h3>🕒 Ώρες (ενδεικτικές)</h3>
+
+<div class="slots">
+{% for s in slots %}
+    <div class="slot">{{ s }}</div>
 {% endfor %}
 </div>
 
-<input type="hidden" name="time" id="selectedTime" required>
-
-<button class="submit">ΚΛΕΙΣΕ ΡΑΝΤΕΒΟΥ</button>
+<!-- 🔥 ΜΟΝΟ ΑΥΤΟ κάνει submit -->
+<button type="submit">💈 Κλείσε ραντεβού</button>
 
 </form>
-
-</div>
-
-<script>
-// SELECT TIME
-function selectTime(e, t) {
-    document.getElementById("selectedTime").value = t;
-
-    document.querySelectorAll(".time-btn").forEach(b => b.classList.remove("active"));
-    e.target.classList.add("active");
-}
-
-// CREATE DAYS (7 days swipe)
-const daysDiv = document.getElementById("days");
-
-for (let i = 0; i < 7; i++) {
-    let d = new Date();
-    d.setDate(d.getDate() + i);
-
-    let dateStr = d.toISOString().split("T")[0];
-
-    let btn = document.createElement("button");
-    btn.innerText = dateStr;
-    btn.className = "day-btn";
-
-    btn.onclick = () => {
-        document.getElementById("selectedDate").value = dateStr;
-
-        document.querySelectorAll(".day-btn").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-    };
-
-    daysDiv.appendChild(btn);
-}
-</script>
 
 </body>
 </html>
