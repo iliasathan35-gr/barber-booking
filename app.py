@@ -8,6 +8,20 @@ FILE = "data.json"
 
 SERVICES = ["Κούρεμα", "Μούσι", "Κούρεμα + Μούσι"]
 
+def generate_slots():
+    slots = []
+    start_hour = 11
+    end_hour = 20
+
+    current = datetime(2000, 1, 1, start_hour, 0)
+    end = datetime(2000, 1, 1, end_hour, 0)
+
+    while current + timedelta(minutes=45) <= end:
+        slots.append(current.strftime("%H:%M"))
+        current += timedelta(minutes=45)
+
+    return slots
+
 def load():
     try:
         with open(FILE) as f:
