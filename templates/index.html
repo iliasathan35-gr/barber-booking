@@ -11,6 +11,10 @@ body {
     padding: 10px;
 }
 
+h2 {
+    text-align: center;
+}
+
 form {
     max-width: 400px;
     margin: auto;
@@ -54,16 +58,14 @@ button {
 .slot-btn.selected {
     background: #00c853;
 }
-
 </style>
-
 </head>
 
 <body>
 
 <h2>💈 Κλείσε Ραντεβού</h2>
 
-<form method="POST" id="bookingForm">
+<form method="POST">
 
 <input name="name" placeholder="Όνομα" required>
 <input name="phone" placeholder="Τηλέφωνο" required>
@@ -75,8 +77,21 @@ button {
     {% endfor %}
 </select>
 
-<input type="date" name="date" required>
+<!-- 🔥 PRO DATE -->
+<label>📅 Ημερομηνία</label>
 
+<input 
+    type="text" 
+    id="dateDisplay" 
+    placeholder="Επίλεξε ημερομηνία"
+    readonly
+    onclick="openDate(this)"
+    style="background:#222; color:white;"
+>
+
+<input type="date" name="date" id="realDate" required style="display:none;">
+
+<!-- 🔥 HOURS -->
 <h3>🕒 Διάλεξε Ώρα</h3>
 
 <div class="slots">
@@ -87,7 +102,6 @@ button {
 {% endfor %}
 </div>
 
-<!-- hidden field -->
 <input type="hidden" name="time" id="timeInput">
 
 <button type="submit">💈 Κλείσε ραντεβού</button>
@@ -95,10 +109,23 @@ button {
 </form>
 
 <script>
-function selectTime(time, el) {
+function openDate(el){
+    let real = document.getElementById("realDate");
+
+    if (real.showPicker) {
+        real.showPicker();
+    } else {
+        real.click();
+    }
+
+    real.onchange = function(){
+        el.value = real.value;
+    }
+}
+
+function selectTime(time, el){
     document.getElementById("timeInput").value = time;
 
-    // reset buttons
     document.querySelectorAll(".slot-btn").forEach(b => {
         b.classList.remove("selected");
     });
