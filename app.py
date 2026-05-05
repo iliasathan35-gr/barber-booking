@@ -28,13 +28,16 @@ def save(data):
 def generate_slots(day):
     slots = []
 
-    if day == 6:  # Κυριακή ❌
+    # Κυριακή κλειστά
+    if day == 6:
         return []
 
-    if day == 5:  # Σάββατο 10-14
+    # Σάββατο 10-14
+    if day == 5:
         start_hour = 10
         end_hour = 14
-    else:  # Δευ-Παρ 11-20
+    else:
+        # Δευτέρα - Παρασκευή
         start_hour = 11
         end_hour = 20
 
@@ -64,29 +67,31 @@ def index():
 
         dt = datetime.strptime(date + " " + time, "%Y-%m-%d %H:%M")
 
+        # --------------------
+        # CUT-OFF 15 λεπτά πριν (σταθερό χωρίς timezone bugs)
+        # --------------------
         now = datetime.now()
-
-        # ❗ CUT-OFF 15 λεπτά πριν
         if dt - now < timedelta(minutes=15):
             return "Δεν επιτρέπεται κράτηση λιγότερο από 15 λεπτά πριν 💈"
 
         day = dt.weekday()
 
-        # ❌ Κυριακή
+        # Κυριακή
         if day == 6:
             return "Κυριακή δεν λειτουργεί 💈"
 
-        # ❌ Σάββατο εκτός ωραρίου
+        # Σάββατο
         if day == 5 and (dt.hour < 10 or dt.hour >= 14):
             return "Σάββατο μόνο 10:00 - 14:00"
 
-        # ❌ Δευ-Παρ εκτός ωραρίου
+        # Δευτέρα - Παρασκευή
         if day <= 4 and (dt.hour < 11 or dt.hour >= 20):
             return "Ωράριο 11:00 - 20:00"
 
         new_start = dt
-        new_end = new_start + timedelta(minutes=45)
+        new_end = dt + timedelta(minutes=45)
 
+        # overlap check
         for d in data:
             existing_start = datetime.strptime(d["time"], "%Y-%m-%d %H:%M")
             existing_end = existing_start + timedelta(minutes=45)
@@ -104,12 +109,10 @@ def index():
         save(data)
         return redirect("/success")
 
-    today = datetime.now().weekday()
-
     return render_template(
         "index.html",
         services=SERVICES,
-        slots=generate_slots(today)
+        slots=generate_slots(datetime.now().weekday())
     )
 
 # --------------------
