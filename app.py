@@ -60,16 +60,15 @@ def generate_slots(day):
 def index():
     data = load()
 
-    if request.method == "POST":
-        name = request.form.get("name")
-        phone = request.form.get("phone")
-        service = request.form.get("service")
-        date = request.form.get("date")
-        time = request.form.get("time")
+  if request.method == "POST":
 
-        if not name or not phone or not date or not time:
-            return "❌ Συμπλήρωσε όλα τα πεδία"
+    name = request.form.get("name")
+    phone = request.form.get("phone")
+    date = request.form.get("date")
+    time = request.form.get("time")
 
+    if not date or not time:
+        return "❌ Επίλεξε ημερομηνία και ώρα"
         try:
             dt = datetime.strptime(date + " " + time, "%Y-%m-%d %H:%M")
         except:
