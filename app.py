@@ -2,15 +2,11 @@ from flask import Flask, render_template, request, redirect, session
 import json
 import os
 from datetime import datetime, timedelta
-import pytz
 
 app = Flask(__name__)
 app.secret_key = "change_this_secret_key"
 
 FILE = "data.json"
-
-# 🇬🇷 Ελλάδα timezone
-GREECE = pytz.timezone("Europe/Athens")
 
 SERVICES = ["Κούρεμα", "Μούσι", "Κούρεμα + Μούσι"]
 ADMIN_PASSWORD = "1234"
@@ -75,11 +71,8 @@ def index():
         date = request.form["date"]
         time = request.form["time"]
 
-        # 🇬🇷 σωστή ώρα Ελλάδας
-        now = datetime.now(GREECE)
-
-        dt_naive = datetime.strptime(date + " " + time, "%Y-%m-%d %H:%M")
-        dt = GREECE.localize(dt_naive)
+        dt = datetime.strptime(date + " " + time, "%Y-%m-%d %H:%M")
+        now = datetime.now()
 
         # ❗ 15 λεπτά πριν rule
         if dt - now < timedelta(minutes=15):
@@ -99,7 +92,6 @@ def index():
         # overlap check
         for d in data:
             existing = datetime.strptime(d["time"], "%Y-%m-%d %H:%M")
-            existing = GREECE.localize(existing)
 
             if abs((existing - dt).total_seconds()) < 2700:
                 return "Υπάρχει ήδη ραντεβού 💈"
@@ -117,7 +109,7 @@ def index():
     return render_template(
         "index.html",
         services=SERVICES,
-        slots=get_free_slots(load(), datetime.now(GREECE).weekday())
+        slots=get_free_slots(load(), datetime.now().weekday())
     )
 
 # --------------------
