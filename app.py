@@ -60,30 +60,36 @@ def generate_slots(day):
 def index():
     data = load()
 
- if request.method == "POST":
+if request.method == "POST":
 
     name = request.form.get("name")
     phone = request.form.get("phone")
+    service = request.form.get("service")
     date = request.form.get("date")
     time = request.form.get("time")
 
-    if not date or not time:
-        return "❌ Επίλεξε ημερομηνία και ώρα"
+    # safety check
+    if not name or not phone or not date or not time:
+        return "❌ Συμπλήρωσε όλα τα πεδία"
 
     try:
-        dt = datetime.strptime(date + " " + time, "%Y-%m-%d %H:%M")
-    except:
-        return "❌ Λάθος ημερομηνία ή ώρα"
+        dt = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M")
+    except Exception as e:
+        return f"❌ Date error: {str(e)}"
 
-        now = datetime.now()
+    now = datetime.now()
 
-        if dt - now < timedelta(minutes=15):
-            return "Δεν επιτρέπεται κράτηση <15 λεπτά πριν 💈"
+    if dt - now < timedelta(minutes=15):
+        return "Δεν επιτρέπεται κράτηση <15 λεπτά πριν 💈"
 
-        for d in data:
+    for d in data:
+        try:
             existing = datetime.strptime(d["time"], "%Y-%m-%d %H:%M")
-            if abs((existing - dt).total_seconds()) < 2700:
-                return "Ώρα κατειλημμένη 💈"
+        except:
+            continue
+
+        if abs((existing - dt).total_seconds()) < 2700:
+            return "Ώρα κατειλημμένη 💈"
 
         data.append({
             "name": name,
