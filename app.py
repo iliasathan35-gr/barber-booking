@@ -205,7 +205,39 @@ def admin():
         return redirect("/login")
 
     data = load()
-    return render_template("admin.html", data=data)
+
+    days = []
+    today = datetime.now()
+
+    for i in range(7):
+        day_date = today + timedelta(days=i)
+        weekday = day_date.weekday()
+
+        slots = generate_slots(weekday)
+
+        day_slots = []
+
+        for s in slots:
+            full_time = f"{day_date.strftime('%Y-%m-%d')} {s}"
+
+            found = None
+            for d in data:
+                if d["time"] == full_time:
+                    found = d
+                    break
+
+            day_slots.append({
+                "time": s,
+                "booking": found
+            })
+
+        days.append({
+            "date": day_date.strftime("%Y-%m-%d"),
+            "weekday": weekday,
+            "slots": day_slots
+        })
+
+    return render_template("admin.html", days=days)
 
 
 if __name__ == "__main__":
