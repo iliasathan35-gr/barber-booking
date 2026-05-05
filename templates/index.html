@@ -6,49 +6,56 @@
 <style>
 body {
     font-family: Arial;
-    background: #111;
+    background: #0f0f0f;
     color: white;
     padding: 10px;
 }
 
 h2 {
     text-align: center;
+    margin-bottom: 5px;
 }
 
-form {
-    max-width: 400px;
+p {
+    text-align: center;
+    opacity: 0.6;
+    margin-top: 0;
+}
+
+.card {
+    max-width: 420px;
     margin: auto;
+    background: #1c1c1c;
+    padding: 20px;
+    border-radius: 16px;
 }
 
 input, select {
     width: 100%;
-    padding: 12px;
+    padding: 14px;
     margin: 8px 0;
-    border-radius: 8px;
+    border-radius: 10px;
     border: none;
-    font-size: 16px;
+    background: #2a2a2a;
+    color: white;
+    font-size: 15px;
+}
+
+input:focus, select:focus {
+    outline: 2px solid #00c853;
 }
 
 button.submit {
     width: 100%;
     padding: 14px;
-    background: #00c853;
+    background: linear-gradient(135deg, #00c853, #00e676);
     border: none;
     color: white;
     font-size: 16px;
-    border-radius: 8px;
+    border-radius: 12px;
     margin-top: 10px;
-}
-
-.date-btn {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: none;
-    background: white;
-    color: black;
-    font-size: 16px;
-    text-align: left;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 .slots {
@@ -59,23 +66,38 @@ button.submit {
 }
 
 .slot-btn {
-    padding: 10px;
-    background: #333;
-    border-radius: 8px;
-    cursor: pointer;
-    border: none;
+    padding: 10px 12px;
+    border-radius: 20px;
+    border: 1px solid #444;
+    background: transparent;
     color: white;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.slot-btn:hover {
+    background: #00c853;
+    border-color: #00c853;
 }
 
 .slot-btn.selected {
     background: #00c853;
+    border-color: #00c853;
+}
+
+label {
+    font-size: 14px;
+    opacity: 0.8;
 }
 </style>
 </head>
 
 <body>
 
-<h2>💈 Κλείσε Ραντεβού</h2>
+<div class="card">
+
+<h2>💈 Book Appointment</h2>
+<p>Fast • Simple • Instant booking</p>
 
 <form method="POST">
 
@@ -89,17 +111,12 @@ button.submit {
     {% endfor %}
 </select>
 
-<!-- 📅 DATE BUTTON -->
+<!-- 📅 DATE -->
 <label>📅 Ημερομηνία</label>
+<input type="date" name="date" required>
 
-<button type="button" class="date-btn" onclick="openDate()" id="dateBtn">
-    📅 Επίλεξε ημερομηνία
-</button>
-
-<input type="date" name="date" id="realDate" required style="display:none;">
-
-<!-- 🕒 HOURS -->
-<h3>🕒 Ώρες</h3>
+<!-- 🕒 SLOTS -->
+<label>🕒 Ώρα</label>
 
 <div class="slots">
 {% for s in slots %}
@@ -115,21 +132,9 @@ button.submit {
 
 </form>
 
+</div>
+
 <script>
-function openDate(){
-    let input = document.getElementById("realDate");
-
-    if (input.showPicker) {
-        input.showPicker();
-    } else {
-        input.click();
-    }
-
-    input.onchange = function(){
-        document.getElementById("dateBtn").innerText = "📅 " + input.value;
-    }
-}
-
 function selectTime(time, el){
     document.getElementById("timeInput").value = time;
 
@@ -139,20 +144,6 @@ function selectTime(time, el){
 
     el.classList.add("selected");
 }
-
-/* 🔥 LIMIT 7 DAYS FRONTEND */
-document.addEventListener("DOMContentLoaded", function(){
-    let input = document.getElementById("realDate");
-
-    let today = new Date();
-    let max = new Date();
-    max.setDate(today.getDate() + 7);
-
-    let format = (d) => d.toISOString().split("T")[0];
-
-    input.min = format(today);
-    input.max = format(max);
-});
 </script>
 
 </body>
