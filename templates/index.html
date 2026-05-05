@@ -29,7 +29,7 @@ input, select {
     font-size: 16px;
 }
 
-button {
+button.submit {
     width: 100%;
     padding: 14px;
     background: #00c853;
@@ -37,6 +37,19 @@ button {
     color: white;
     font-size: 16px;
     border-radius: 8px;
+    margin-top: 10px;
+}
+
+.date-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    background: white;
+    color: black;
+    font-size: 16px;
+    text-align: left;
+    margin: 8px 0;
 }
 
 .slots {
@@ -77,17 +90,12 @@ button {
     {% endfor %}
 </select>
 
-<!-- 🔥 PRO DATE -->
-<label>📅 Ημερομηνία</label>
+<!-- 🔥 DATE BUTTON -->
 <label>📅 Ημερομηνία</label>
 
-<input 
-    type="date" 
-    name="date" 
-    required
-    style="width:100%; padding:12px; border-radius:8px; border:none; background:#222; color:white;"
->
-
+<button type="button" class="date-btn" onclick="openDate()" id="dateBtn">
+    📅 Επίλεξε ημερομηνία
+</button>
 
 <input type="date" name="date" id="realDate" required style="display:none;">
 
@@ -104,22 +112,22 @@ button {
 
 <input type="hidden" name="time" id="timeInput">
 
-<button type="submit">💈 Κλείσε ραντεβού</button>
+<button type="submit" class="submit">💈 Κλείσε ραντεβού</button>
 
 </form>
 
 <script>
-function openDate(el){
-    let real = document.getElementById("realDate");
+function openDate(){
+    let input = document.getElementById("realDate");
 
-    if (real.showPicker) {
-        real.showPicker();
+    if (input.showPicker) {
+        input.showPicker();
     } else {
-        real.click();
+        input.click();
     }
 
-    real.onchange = function(){
-        el.value = real.value;
+    input.onchange = function(){
+        document.getElementById("dateBtn").innerText = "📅 " + input.value;
     }
 }
 
