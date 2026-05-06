@@ -40,21 +40,21 @@ a {
     background: #2a2a2a;
     padding: 10px;
     border-radius: 8px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 input, select {
+    width: 100%;
     padding: 6px;
-    margin: 3px;
+    margin: 3px 0;
     border-radius: 6px;
     border: none;
-    width: 100%;
 }
 
 button {
     padding: 6px 10px;
-    border-radius: 6px;
     border: none;
+    border-radius: 6px;
     cursor: pointer;
 }
 
@@ -66,6 +66,10 @@ button {
 .delete {
     background: red;
     color: white;
+}
+
+small {
+    opacity: 0.7;
 }
 </style>
 </head>
@@ -89,6 +93,8 @@ button {
 
             <div class="item">
 
+                <small>Ώρα: {{ b.time }}</small><br>
+
                 <!-- EDIT FORM -->
                 <form method="POST" action="/admin/edit/{{ b.index }}">
 
@@ -109,6 +115,8 @@ button {
                     <button type="submit" class="save">💾 Save</button>
 
                 </form>
+
+                <br>
 
                 <!-- DELETE -->
                 <a href="/admin/delete/{{ b.index }}">
