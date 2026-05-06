@@ -142,12 +142,12 @@ def index():
             slot_status.append({"time": s, "status": "free"})
 
     return render_template(
-        "index.html",
-        services=SERVICES,
-        slots=slot_status
-        today=today_dt.strftime("%Y-%m-%d"),
-        max_date=(today_dt + timedelta(days=7)).strftime("%Y-%m-%d")
-    )
+    "index.html",
+    services=SERVICES,
+    slots=slot_status,
+    today=today_dt.strftime("%Y-%m-%d"),
+    max_date=(today_dt + timedelta(days=7)).strftime("%Y-%m-%d")
+)
 
 
 # ---------------- LOGIN ----------------
