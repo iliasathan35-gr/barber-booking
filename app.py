@@ -33,8 +33,8 @@ def save(data):
 # ---------------- TELEGRAM ----------------
 def send_telegram(text):
     try:
-        TOKEN = "YOUR_TOKEN"
-        CHAT_ID = "YOUR_CHAT_ID"
+        TOKEN = "8780779879:AAHKpT6H0aLiWQV85-08NvWh3l_xBEyHfLA"
+        CHAT_ID = "8780021902"
 
         url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
         requests.post(url, data={"chat_id": CHAT_ID, "text": text})
