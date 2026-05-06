@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Booking</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #111;
+            color: white;
+            padding: 20px;
+        }
+
+        input {
+            display: block;
+            width: 300px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+        }
+
+        button {
+            padding: 10px 15px;
+            background: green;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>✏️ Edit Booking</h2>
+
+<form method="POST">
+
+    <input name="name" value="{{ b.name }}" placeholder="Όνομα">
+    <input name="phone" value="{{ b.phone }}" placeholder="Τηλέφωνο">
+    <input name="service" value="{{ b.service }}" placeholder="Υπηρεσία">
+    <input name="time" value="{{ b.time }}" placeholder="YYYY-MM-DD HH:MM">
+
+    <button type="submit">Save</button>
+
+</form>
+
+</body>
+</html>
