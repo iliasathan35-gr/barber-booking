@@ -212,12 +212,15 @@ def admin_book(date, time):
     if not session.get("admin"):
         return redirect("/login")
 
+    data = load()
+
     if request.method == "POST":
         name = request.form.get("name")
         phone = request.form.get("phone")
         service = request.form.get("service")
 
-        data = load()
+        if not name or not phone:
+            return "❌ Missing data"
 
         data.append({
             "name": name,
