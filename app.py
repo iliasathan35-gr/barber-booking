@@ -189,11 +189,11 @@ for i in range(10):
 
     label = f"{days_gr[day.weekday()]} {day.day} {months_gr[day.month - 1]} {day.year}"
 
-        slots = generate_slots(day.weekday())
+    slots = generate_slots(day.weekday())
 
-        day_bookings = []
+     day_bookings = []
 
-        booked_times = []
+    booked_times = []
 
         for idx, d in enumerate(data):
             if d["time"].startswith(date_str):
