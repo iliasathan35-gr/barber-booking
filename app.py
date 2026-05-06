@@ -207,23 +207,30 @@ def admin():
 
 
 # ---------------- ADMIN BOOK ----------------
-@app.route("/admin/book/<date>/<time>")
+@app.route("/admin/book/<date>/<time>", methods=["GET", "POST"])
 def admin_book(date, time):
     if not session.get("admin"):
         return redirect("/login")
 
-    data = load()
+    if request.method == "POST":
+        name = request.form.get("name")
+        phone = request.form.get("phone")
+        service = request.form.get("service")
 
-    data.append({
-        "name": "ADMIN",
-        "phone": "-",
-        "service": "Manual booking",
-        "time": f"{date} {time}",
-        "token": str(uuid.uuid4())
-    })
+        data = load()
 
-    save(data)
-    return redirect("/admin")
+        data.append({
+            "name": name,
+            "phone": phone,
+            "service": service,
+            "time": f"{date} {time}",
+            "token": str(uuid.uuid4())
+        })
+
+        save(data)
+        return redirect("/admin")
+
+    return render_template("admin_book.html", date=date, time=time)
 
 
 # ---------------- EDIT ----------------
