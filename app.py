@@ -239,6 +239,40 @@ def admin():
 
     return render_template("admin.html", days=days)
 
+@app.route("/admin/add", methods=["POST"])
+def admin_add():
+    if not session.get("admin"):
+        return redirect("/login")
+
+    data = load()
+
+    name = request.form.get("name")
+    phone = request.form.get("phone")
+    service = request.form.get("service")
+    date = request.form.get("date")
+    time = request.form.get("time")
+
+    if not name or not phone:
+        return "❌ Συμπλήρωσε στοιχεία"
+
+    full_time = f"{date} {time}"
+
+    # overlap check
+    for d in data:
+        if d["time"] == full_time:
+            return "❌ Ήδη κλεισμένο"
+
+    data.append({
+        "name": name,
+        "phone": phone,
+        "service": service,
+        "time": full_time
+    })
+
+    save(data)
+
+    return redirect("/admin")
+
 
 if __name__ == "__main__":
     app.run(debug=True)
