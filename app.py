@@ -144,7 +144,7 @@ def index():
     return render_template(
         "index.html",
         services=SERVICES,
-        slots=available,
+        slots=slot_status
         today=today_dt.strftime("%Y-%m-%d"),
         max_date=(today_dt + timedelta(days=7)).strftime("%Y-%m-%d")
     )
