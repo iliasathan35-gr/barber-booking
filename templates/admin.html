@@ -1,44 +1,119 @@
-@app.route("/admin")
-def admin():
-    if not session.get("admin"):
-        return redirect("/login")
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
 
-    data = load()
-    today = datetime.now()
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
 
-    days = []
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
-    for i in range(10):
-        day = today + timedelta(days=i)
-        date_str = day.strftime("%Y-%m-%d")
+        .day {
+            background: #1c1c1c;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+        }
 
-        # ✅ LABEL
-        label = f"{days_gr[day.weekday()]} {day.day} {months_gr[day.month - 1]} {day.year}"
+        .day-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
 
-        slots = generate_slots(day.weekday())
+        .slots, .bookings {
+            margin-top: 10px;
+        }
 
-        day_bookings = []
-        booked_times = []
+        .slot {
+            display: inline-block;
+            background: #333;
+            padding: 5px 10px;
+            margin: 3px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
 
-        for idx, d in enumerate(data):
-            if d["time"].startswith(date_str):
-                t = d["time"].split(" ")[1]
-                booked_times.append(t)
+        .booking {
+            background: #2a2a2a;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+        }
 
-                day_bookings.append({
-                    "index": idx,
-                    "name": d["name"],
-                    "phone": d["phone"],
-                    "service": d["service"],
-                    "time": d["time"],
-                    "status": "booked"
-                })
+        .btn {
+            padding: 5px 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
 
-        days.append({
-            "date": date_str,
-            "label": label,
-            "slots": slots,
-            "bookings": day_bookings
-        })
+        .edit {
+            background: #f0ad4e;
+        }
 
-    return render_template("admin.html", days=days)
+        .delete {
+            background: #d9534f;
+            color: white;
+        }
+
+        .book {
+            background: #5cb85c;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>💈 Admin Panel</h1>
+
+{% for day in days %}
+
+<div class="day">
+
+    <!-- 📅 Ημερομηνία -->
+    <div class="day-title">
+        {{ day.label }}
+    </div>
+
+    <!-- ⏰ Slots -->
+    <div class="slots">
+        {% for slot in day.slots %}
+            <span class="slot">{{ slot }}</span>
+        {% endfor %}
+    </div>
+
+    <!-- 📌 Bookings -->
+    <div class="bookings">
+        {% for b in day.bookings %}
+            <div class="booking">
+                <b>{{ b.name }}</b> - {{ b.phone }} <br>
+                {{ b.service }} <br>
+                🕒 {{ b.time }}
+
+                <!-- buttons -->
+                <a class="btn edit" href="/admin/edit/{{ b.index }}">Edit</a>
+                <a class="btn delete" href="/admin/delete/{{ b.index }}">Delete</a>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+{% endfor %}
+
+</body>
+</html>
