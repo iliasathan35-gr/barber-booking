@@ -80,6 +80,8 @@ button {
 {% for day in days %}
 
 <div class="day">
+    {{ day.label }}
+</div>
 
     <!-- ONLY BUTTON CONTROLS TOGGLE -->
     <button type="button" class="toggle-btn" onclick="toggle({{ loop.index }})">
