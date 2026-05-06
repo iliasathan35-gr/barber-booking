@@ -56,34 +56,34 @@ button {
 
 {% for day in days %}
 
-<div class="day" onclick="toggle('{{ loop.index }}')">
-    📆 {{ day.date }} ({{ day.bookings|length }} ραντεβού)
+<div class="item">
 
-    <div class="box" id="box{{ loop.index }}">
+    <form method="POST" action="/admin/edit/{{ b.index }}">
 
-        {% if day.bookings %}
+        <input name="name" value="{{ b.name }}">
+        <input name="phone" value="{{ b.phone }}">
 
-            {% for b in day.bookings %}
-            <div class="item">
+        <select name="service">
+            <option {% if b.service=="Κούρεμα" %}selected{% endif %}>Κούρεμα</option>
+            <option {% if b.service=="Μούσι" %}selected{% endif %}>Μούσι</option>
+            <option {% if b.service=="Κούρεμα + Μούσι" %}selected{% endif %}>Κούρεμα + Μούσι</option>
+        </select>
 
-                <b>{{ b.time }}</b><br>
-                {{ b.name }} - {{ b.phone }}<br>
-                {{ b.service }}
+        {% set parts = b.time.split(' ') %}
 
-                <br><br>
+        <input type="date" name="date" value="{{ parts[0] }}">
+        <input type="time" name="time" value="{{ parts[1] }}">
 
-                <a href="/admin/delete/{{ b.index }}">
-                    <button class="delete">❌ Delete</button>
-                </a>
+        <button type="submit">💾 Save</button>
 
-            </div>
-            {% endfor %}
+    </form>
 
-        {% else %}
-            <p>❌ Κανένα ραντεβού</p>
-        {% endif %}
+    <br>
 
-    </div>
+    <a href="/admin/delete/{{ b.index }}">
+        <button class="delete">❌ Delete</button>
+    </a>
+
 </div>
 
 {% endfor %}
