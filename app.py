@@ -191,7 +191,7 @@ for i in range(10):
 
     slots = generate_slots(day.weekday())
 
-     day_bookings = []
+    day_bookings = []
 
     booked_times = []
 
