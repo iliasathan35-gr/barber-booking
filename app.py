@@ -183,15 +183,15 @@ def admin():
 
 days = []
 
-for i in range(10):
-    day = today + timedelta(days=i)
-    date_str = day.strftime("%Y-%m-%d")
+    for i in range(10):
+        day = today + timedelta(days=i)
+        date_str = day.strftime("%Y-%m-%d")
 
-    label = f"{days_gr[day.weekday()]} {day.day} {months_gr[day.month - 1]} {day.year}"
+        label = f"{days_gr[day.weekday()]} {day.day} {months_gr[day.month - 1]} {day.year}"
 
-    slots = generate_slots(day.weekday())
+        slots = generate_slots(day.weekday())
 
-    day_bookings = []
+        day_bookings = []
 
     for idx, d in enumerate(data):
         if d["time"].startswith(date_str):
