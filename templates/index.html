@@ -66,8 +66,16 @@ button.submit {
 
 <form method="POST">
 
-<input name="name" placeholder="Όνομα" required>
-<input name="phone" placeholder="Τηλέφωνο" required>
+<label>📅 Επίλεξε ημερομηνία:</label>
+
+<input 
+  type="date" 
+  name="date" 
+  value="{{ today }}"
+  min="{{ today }}"
+  max="{{ max_date }}"
+  required
+>
 
 <select name="service" required>
 <option value="">Υπηρεσία</option>
