@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <title>Polutelias 💈</title>
-</head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Polutelias 💈</title>
 
 <style>
 body {
@@ -32,6 +29,7 @@ input, select {
     margin: 8px 0;
     border-radius: 6px;
     border: none;
+    box-sizing: border-box;
 }
 
 button {
@@ -42,6 +40,7 @@ button {
     border: none;
     border-radius: 8px;
     font-size: 16px;
+    cursor: pointer;
 }
 
 .slots {
@@ -57,6 +56,7 @@ button {
     text-align: center;
     border-radius: 6px;
     cursor: pointer;
+    transition: 0.2s;
 }
 
 .slot:hover {
@@ -81,50 +81,31 @@ button {
 
     <select name="service" required>
         <option value="">Επίλεξε υπηρεσία</option>
+
         {% for s in services %}
             <option>{{ s }}</option>
         {% endfor %}
     </select>
 
-    <!-- DATE FIXED -->
+    <!-- DATE -->
     <label>📅 Ημερομηνία:</label>
-   <input 
-    type="date"
-    id="date"
-    name="date"
-    value="{{ today }}"
-    min="{{ today }}"
-    max="{{ max_date }}"
-    required
->
 
-<script>
-document.getElementById("date").addEventListener("input", function () {
+    <input 
+        type="date"
+        id="date"
+        name="date"
+        value="{{ today }}"
+        min="{{ today }}"
+        max="{{ max_date }}"
+        required
+    >
 
-    let selected = new Date(this.value);
-
-    // Κυριακή
-    if (selected.getDay() === 0) {
-
-        alert("❌ Τις Κυριακές είμαστε κλειστά");
-
-        this.value = "";
-    }
-});
-</script>
-
-    <!-- TIME SLOTS -->
+    <!-- TIME -->
     <label>⏰ Ώρα:</label>
 
-    <div class="slots">
-        {% for s in slots %}
-        <div class="slot" onclick="selectTime('{{ s }}', this)">
-            {{ s }}
-        </div>
-        {% endfor %}
-    </div>
+    <div class="slots" id="slots"></div>
 
-    <!-- hidden input για ώρα -->
+    <!-- hidden time input -->
     <input type="hidden" name="time" id="timeInput" required>
 
     <br>
@@ -134,15 +115,94 @@ document.getElementById("date").addEventListener("input", function () {
 </form>
 
 <script>
+
 function selectTime(time, el){
 
     document.getElementById("timeInput").value = time;
 
     let slots = document.querySelectorAll(".slot");
+
     slots.forEach(s => s.classList.remove("selected"));
 
     el.classList.add("selected");
 }
+
+
+// LOAD SLOTS
+function loadSlots(date){
+
+    fetch("/slots?date=" + date)
+
+    .then(res => res.json())
+
+    .then(data => {
+
+        let container = document.getElementById("slots");
+
+        container.innerHTML = "";
+
+        // ❌ no slots
+        if(data.length === 0){
+
+            container.innerHTML =
+            "<p>❌ Δεν υπάρχουν διαθέσιμες ώρες</p>";
+
+            return;
+        }
+
+        // create buttons
+        data.forEach(time => {
+
+            let div = document.createElement("div");
+
+            div.className = "slot";
+
+            div.innerText = time;
+
+            div.onclick = function(){
+                selectTime(time, div);
+            };
+
+            container.appendChild(div);
+
+        });
+
+    });
+}
+
+
+// DATE CHANGE
+document.getElementById("date").addEventListener("input", function () {
+
+    let selected = new Date(this.value);
+
+    // ❌ Κυριακή
+    if (selected.getDay() === 0) {
+
+        alert("❌ Τις Κυριακές είμαστε κλειστά");
+
+        this.value = "";
+
+        document.getElementById("slots").innerHTML = "";
+
+        return;
+    }
+
+    loadSlots(this.value);
+
+});
+
+
+// INITIAL LOAD
+window.onload = function(){
+
+    let date = document.getElementById("date").value;
+
+    if(date){
+        loadSlots(date);
+    }
+}
+
 </script>
 
 </body>
