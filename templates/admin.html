@@ -12,38 +12,31 @@ body {
 }
 
 .day {
-    margin-bottom: 20px;
-    background: #1c1c1c;
     padding: 12px;
-    border-radius: 12px;
+    margin-bottom: 10px;
+    background: #1c1c1c;
+    border-radius: 10px;
+    cursor: pointer;
 }
 
-.slot {
-    padding: 8px;
-    margin: 6px 0;
-    border-radius: 8px;
+.day:hover {
     background: #2a2a2a;
 }
 
-.booked {
-    background: #00c853;
-    color: black;
+.box {
+    display: none;
+    margin-top: 10px;
 }
 
-form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
-input, select {
-    padding: 6px;
-    border-radius: 6px;
-    border: none;
+.item {
+    background: #2a2a2a;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 6px;
 }
 
 button {
-    padding: 6px;
+    padding: 5px 8px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -62,73 +55,45 @@ button {
 <a href="/logout">Logout</a>
 
 {% for day in days %}
-<div class="day">
 
-<h3>{{ day.date }}</h3>
+<div class="day" onclick="toggle('{{ loop.index }}')">
+    📆 {{ day.date }} ({{ day.bookings|length }} ραντεβού)
 
-{% if day.slots %}
-    {% for s in day.slots %}
+    <div class="box" id="box{{ loop.index }}">
 
-        <div class="slot">
+        {% if day.bookings %}
 
-        <strong>{{ s.time }}</strong>
+            {% for b in day.bookings %}
+            <div class="item">
 
-        {% if s.booking %}
+                <b>{{ b.time }}</b><br>
+                {{ b.name }} - {{ b.phone }}<br>
+                {{ b.service }}
 
-            <!-- EDIT -->
-            <form method="POST" action="/admin/edit/{{ s.booking.index }}">
+                <br><br>
 
-                <input type="hidden" name="date" value="{{ day.date }}">
-                <input type="hidden" name="time" value="{{ s.time }}">
+                <a href="/admin/delete/{{ b.index }}">
+                    <button class="delete">❌ Delete</button>
+                </a>
 
-                <input name="name" value="{{ s.booking.name }}">
-                <input name="phone" value="{{ s.booking.phone }}">
-
-                <select name="service">
-                    <option {% if s.booking.service=="Κούρεμα" %}selected{% endif %}>Κούρεμα</option>
-                    <option {% if s.booking.service=="Μούσι" %}selected{% endif %}>Μούσι</option>
-                    <option {% if s.booking.service=="Κούρεμα + Μούσι" %}selected{% endif %}>Κούρεμα + Μούσι</option>
-                </select>
-
-                <button type="submit">💾</button>
-            </form>
-
-            <!-- DELETE -->
-            <a href="/admin/delete/{{ s.booking.index }}">
-                <button class="delete">❌</button>
-            </a>
+            </div>
+            {% endfor %}
 
         {% else %}
-
-            <!-- ADD -->
-            <form method="POST" action="/admin/add">
-
-                <input type="hidden" name="date" value="{{ day.date }}">
-                <input type="hidden" name="time" value="{{ s.time }}">
-
-                <input name="name" placeholder="Όνομα">
-                <input name="phone" placeholder="Τηλ">
-
-                <select name="service">
-                    <option>Κούρεμα</option>
-                    <option>Μούσι</option>
-                    <option>Κούρεμα + Μούσι</option>
-                </select>
-
-                <button>➕</button>
-            </form>
-
+            <p>❌ Κανένα ραντεβού</p>
         {% endif %}
 
-        </div>
-
-    {% endfor %}
-{% else %}
-    <p>❌ Κλειστά</p>
-{% endif %}
-
+    </div>
 </div>
+
 {% endfor %}
+
+<script>
+function toggle(id){
+    let box = document.getElementById("box"+id);
+    box.style.display = (box.style.display === "block") ? "none" : "block";
+}
+</script>
 
 </body>
 </html>
