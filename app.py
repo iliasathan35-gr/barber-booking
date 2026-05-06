@@ -133,7 +133,13 @@ def index():
         if d["time"].startswith(today_str):
             booked.append(d["time"].split(" ")[1])
 
-    available = [s for s in slots if s not in booked]
+    slot_status = []
+
+    for s in slots:
+        if s in booked:
+            slot_status.append({"time": s, "status": "booked"})
+        else:
+            slot_status.append({"time": s, "status": "free"})
 
     return render_template(
         "index.html",
