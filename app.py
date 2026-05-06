@@ -184,8 +184,11 @@ def admin():
     days = []
 
     for i in range(10):
-        day = today + timedelta(days=i)
-        date_str = day.strftime("%Y-%m-%d")
+    day = today + timedelta(days=i)
+    date_str = day.strftime("%Y-%m-%d")
+
+    # 👉 ΝΕΟ (label με ελληνικά)
+    label = f"{days_gr[day.weekday()]} {day.day} {months_gr[day.month - 1]} {day.year}"
 
         slots = generate_slots(day.weekday())
 
