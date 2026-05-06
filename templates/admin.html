@@ -11,10 +11,18 @@ body {
     padding: 10px;
 }
 
+h2 {
+    text-align: center;
+}
+
+a {
+    color: white;
+}
+
 .day {
+    background: #1c1c1c;
     padding: 12px;
     margin-bottom: 10px;
-    background: #1c1c1c;
     border-radius: 10px;
     cursor: pointer;
 }
@@ -32,14 +40,27 @@ body {
     background: #2a2a2a;
     padding: 10px;
     border-radius: 8px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
+}
+
+input, select {
+    padding: 6px;
+    margin: 3px;
+    border-radius: 6px;
+    border: none;
+    width: 100%;
 }
 
 button {
-    padding: 5px 8px;
-    border: none;
+    padding: 6px 10px;
     border-radius: 6px;
+    border: none;
     cursor: pointer;
+}
+
+.save {
+    background: #00c853;
+    color: white;
 }
 
 .delete {
@@ -56,34 +77,53 @@ button {
 
 {% for day in days %}
 
-<div class="item">
+<div class="day" onclick="toggle({{ loop.index }})">
 
-    <form method="POST" action="/admin/edit/{{ b.index }}">
+    📆 {{ day.date }} ({{ day.bookings|length }} ραντεβού)
 
-        <input name="name" value="{{ b.name }}">
-        <input name="phone" value="{{ b.phone }}">
+    <div class="box" id="box{{ loop.index }}">
 
-        <select name="service">
-            <option {% if b.service=="Κούρεμα" %}selected{% endif %}>Κούρεμα</option>
-            <option {% if b.service=="Μούσι" %}selected{% endif %}>Μούσι</option>
-            <option {% if b.service=="Κούρεμα + Μούσι" %}selected{% endif %}>Κούρεμα + Μούσι</option>
-        </select>
+        {% if day.bookings %}
 
-        {% set parts = b.time.split(' ') %}
+            {% for b in day.bookings %}
 
-        <input type="date" name="date" value="{{ parts[0] }}">
-        <input type="time" name="time" value="{{ parts[1] }}">
+            <div class="item">
 
-        <button type="submit">💾 Save</button>
+                <!-- EDIT FORM -->
+                <form method="POST" action="/admin/edit/{{ b.index }}">
 
-    </form>
+                    <input name="name" value="{{ b.name }}" placeholder="Όνομα">
+                    <input name="phone" value="{{ b.phone }}" placeholder="Τηλέφωνο">
 
-    <br>
+                    <select name="service">
+                        <option {% if b.service=="Κούρεμα" %}selected{% endif %}>Κούρεμα</option>
+                        <option {% if b.service=="Μούσι" %}selected{% endif %}>Μούσι</option>
+                        <option {% if b.service=="Κούρεμα + Μούσι" %}selected{% endif %}>Κούρεμα + Μούσι</option>
+                    </select>
 
-    <a href="/admin/delete/{{ b.index }}">
-        <button class="delete">❌ Delete</button>
-    </a>
+                    {% set parts = b.time.split(' ') %}
 
+                    <input type="date" name="date" value="{{ parts[0] }}">
+                    <input type="time" name="time" value="{{ parts[1] }}">
+
+                    <button type="submit" class="save">💾 Save</button>
+
+                </form>
+
+                <!-- DELETE -->
+                <a href="/admin/delete/{{ b.index }}">
+                    <button class="delete">❌ Delete</button>
+                </a>
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+            <p>❌ Κανένα ραντεβού</p>
+        {% endif %}
+
+    </div>
 </div>
 
 {% endfor %}
@@ -91,7 +131,12 @@ button {
 <script>
 function toggle(id){
     let box = document.getElementById("box"+id);
-    box.style.display = (box.style.display === "block") ? "none" : "block";
+
+    if (box.style.display === "block") {
+        box.style.display = "none";
+    } else {
+        box.style.display = "block";
+    }
 }
 </script>
 
