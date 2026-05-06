@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, jsonify
 from datetime import datetime, timedelta
 import json
+import uuid
 
 app = Flask(__name__)
 app.secret_key = "secret123"
@@ -38,18 +39,15 @@ def send_telegram(text):
 
 # ---------------- SLOTS ----------------
 def generate_slots(day):
-    slots = []
-
-    # Κυριακή κλειστά
     if day == 6:
         return []
 
-    # Σάββατο
+    slots = []
+
     if day == 5:
         start = datetime(2000, 1, 1, 10, 0)
         end = datetime(2000, 1, 1, 14, 0)
     else:
-        # Καθημερινές
         start = datetime(2000, 1, 1, 11, 0)
         end = datetime(2000, 1, 1, 20, 0)
 
@@ -85,31 +83,29 @@ def index():
             return "❌ Λάθος ημερομηνία ή ώρα"
 
         now = datetime.now()
-        max_date = now + timedelta(days=7)
-
         if dt.weekday() == 6:
-            return "❌ Κυριακή είμαστε κλειστά"
+            return "❌ Κυριακή κλειστά"
 
-        if dt > max_date:
-            return "❌ Μόνο έως 7 μέρες μπροστά"
+        if dt > now + timedelta(days=7):
+            return "❌ Μέχρι 7 μέρες"
 
         if dt - now < timedelta(minutes=15):
-            return "❌ Δεν επιτρέπεται κράτηση <15 λεπτά πριν"
+            return "❌ Πολύ κοντά"
 
         for d in data:
             try:
                 existing = datetime.strptime(d["time"], "%Y-%m-%d %H:%M")
+                if abs((existing - dt).total_seconds()) < 2700:
+                    return "❌ Ώρα κατειλημμένη"
             except:
-                continue
-
-            if abs((existing - dt).total_seconds()) < 2700:
-                return "❌ Ώρα κατειλημμένη"
+                pass
 
         data.append({
             "name": name,
             "phone": phone,
             "service": service,
-            "time": f"{date} {time}"
+            "time": f"{date} {time}",
+            "token": str(uuid.uuid4())
         })
 
         save(data)
@@ -133,14 +129,10 @@ def index():
 
     available = [s for s in slots if s not in booked]
 
-    return render_template(
-        "index.html",
-        services=SERVICES,
-        slots=available
-    )
+    return render_template("index.html", services=SERVICES, slots=available)
 
 
-# ---------------- API ----------------
+# ---------------- SLOTS API ----------------
 @app.route("/slots")
 def slots_api():
     date = request.args.get("date")
@@ -158,16 +150,10 @@ def slots_api():
 
     booked = []
     for d in data:
-        try:
-            existing = datetime.strptime(d["time"], "%Y-%m-%d %H:%M")
-            if existing.strftime("%Y-%m-%d") == date:
-                booked.append(existing.strftime("%H:%M"))
-        except:
-            pass
+        if d["time"].startswith(date):
+            booked.append(d["time"].split(" ")[1])
 
-    available = [s for s in slots if s not in booked]
-
-    return jsonify(available)
+    return jsonify([s for s in slots if s not in booked])
 
 
 # ---------------- LOGIN ----------------
@@ -177,7 +163,7 @@ def login():
         if request.form.get("password") == "admin":
             session["admin"] = True
             return redirect("/admin")
-        return "❌ Λάθος password"
+        return "❌ Λάθος"
 
     return render_template("login.html")
 
@@ -196,12 +182,12 @@ def admin():
 
     data = load()
 
-    today = datetime.now()
     days = []
+    today = datetime.now()
 
     for i in range(10):
-        day_date = today + timedelta(days=i)
-        date_str = day_date.strftime("%Y-%m-%d")
+        day = today + timedelta(days=i)
+        date_str = day.strftime("%Y-%m-%d")
 
         bookings = []
 
@@ -222,6 +208,7 @@ def admin():
 
     return render_template("admin.html", days=days)
 
+
 # ---------------- ADD ----------------
 @app.route("/admin/add", methods=["POST"])
 def admin_add():
@@ -230,23 +217,15 @@ def admin_add():
 
     data = load()
 
-    name = request.form.get("name")
-    phone = request.form.get("phone")
-    service = request.form.get("service")
     date = request.form.get("date")
     time = request.form.get("time")
 
-    full_time = f"{date} {time}"
-
-    for d in data:
-        if d["time"] == full_time:
-            return "❌ Ήδη κλεισμένο"
-
     data.append({
-        "name": name,
-        "phone": phone,
-        "service": service,
-        "time": full_time
+        "name": request.form.get("name"),
+        "phone": request.form.get("phone"),
+        "service": request.form.get("service"),
+        "time": f"{date} {time}",
+        "token": str(uuid.uuid4())
     })
 
     save(data)
@@ -254,7 +233,6 @@ def admin_add():
 
 
 # ---------------- EDIT ----------------
-
 @app.route("/admin/edit/<int:index>", methods=["POST"])
 def admin_edit(index):
     if not session.get("admin"):
@@ -262,30 +240,20 @@ def admin_edit(index):
 
     data = load()
 
-    name = request.form.get("name")
-    phone = request.form.get("phone")
-    service = request.form.get("service")
     date = request.form.get("date")
     time = request.form.get("time")
 
-    if not name or not phone or not date or not time:
-        return "❌ Λείπουν στοιχεία"
-
-    new_time = f"{date} {time}"
-
-    # overlap check (εκτός του ίδιου)
-    for i, d in enumerate(data):
-        if i == index:
-            continue
-        if d["time"] == new_time:
-            return "❌ Ώρα κατειλημμένη"
-
     data[index] = {
-        "name": name,
-        "phone": phone,
-        "service": service,
-        "time": new_time
+        "name": request.form.get("name"),
+        "phone": request.form.get("phone"),
+        "service": request.form.get("service"),
+        "time": f"{date} {time}",
+        "token": data[index].get("token", str(uuid.uuid4()))
     }
+
+    save(data)
+    return redirect("/admin")
+
 
 # ---------------- DELETE ----------------
 @app.route("/admin/delete/<int:index>")
@@ -297,8 +265,8 @@ def admin_delete(index):
 
     if 0 <= index < len(data):
         data.pop(index)
-        save(data)
 
+    save(data)
     return redirect("/admin")
 
 
@@ -306,41 +274,6 @@ def admin_delete(index):
 @app.route("/success")
 def success():
     return render_template("success.html")
-
-@app.route("/admin/edit/<int:index>", methods=["POST"])
-def admin_edit(index):
-    if not session.get("admin"):
-        return redirect("/login")
-
-    data = load()
-
-    name = request.form.get("name")
-    phone = request.form.get("phone")
-    service = request.form.get("service")
-    date = request.form.get("date")
-    time = request.form.get("time")
-
-    if not name or not phone or not date or not time:
-        return "❌ Λείπουν στοιχεία"
-
-    new_time = f"{date} {time}"
-
-    # overlap check (εκτός του ίδιου)
-    for i, d in enumerate(data):
-        if i == index:
-            continue
-        if d["time"] == new_time:
-            return "❌ Ώρα κατειλημμένη"
-
-    data[index] = {
-        "name": name,
-        "phone": phone,
-        "service": service,
-        "time": new_time
-    }
-
-    save(data)
-    return redirect("/admin")
 
 
 if __name__ == "__main__":
