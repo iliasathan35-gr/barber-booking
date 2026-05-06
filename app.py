@@ -4,15 +4,6 @@ import json
 import uuid
 import requests
 
-# 🇬🇷 Ημέρες & Μήνες
-days_gr = ["Δευτέρα", "Τρίτη", "Τετάρτη", "Πέμπτη", "Παρασκευή", "Σάββατο", "Κυριακή"]
-
-months_gr = [
-    "Ιανουαρίου", "Φεβρουαρίου", "Μαρτίου", "Απριλίου",
-    "Μαΐου", "Ιουνίου", "Ιουλίου", "Αυγούστου",
-    "Σεπτεμβρίου", "Οκτωβρίου", "Νοεμβρίου", "Δεκεμβρίου"
-]
-
 app = Flask(__name__)
 app.secret_key = "secret123"
 
@@ -41,33 +32,26 @@ def send_telegram(text):
     except:
         pass
 
+# ---------------- SERVICES ----------------
+SERVICES = ["Κούρεμα", "Μούσι", "Κούρεμα + Μούσι"]
+
 # ---------------- SLOTS ----------------
-def generate_slots(day):
-    if day == 6:
-        return []
+def generate_slots():
+    start = datetime(2000, 1, 1, 11, 0)
+    end = datetime(2000, 1, 1, 20, 0)
 
     slots = []
-
-    if day == 5:
-        start = datetime(2000, 1, 1, 10, 0)
-        end = datetime(2000, 1, 1, 14, 0)
-    else:
-        start = datetime(2000, 1, 1, 11, 0)
-        end = datetime(2000, 1, 1, 20, 0)
-
     while start <= end:
         slots.append(start.strftime("%H:%M"))
         start += timedelta(minutes=45)
 
     return slots
 
-SERVICES = ["Κούρεμα", "Μούσι", "Κούρεμα + Μούσι"]
-
 # ---------------- HOME ----------------
 @app.route("/", methods=["GET", "POST"])
 def index():
     data = load()
-    today_dt = datetime.now()
+    today = datetime.now()
 
     if request.method == "POST":
         name = request.form.get("name")
@@ -81,47 +65,54 @@ def index():
 
         dt = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M")
 
+        # basic checks
         if dt.weekday() == 6:
             return "❌ Κυριακή κλειστά"
 
-        if dt > today_dt + timedelta(days=7):
+        if dt > today + timedelta(days=7):
             return "❌ Μέχρι 7 μέρες"
 
-        if dt - today_dt < timedelta(minutes=15):
+        if dt - today < timedelta(minutes=15):
             return "❌ Πολύ κοντά"
 
+        # conflict check
         for d in data:
-            existing = datetime.strptime(d["time"], "%Y-%m-%d %H:%M")
-            if abs((existing - dt).total_seconds()) < 2700:
+            if d["time"] == f"{date} {time}":
                 return "❌ Ώρα κατειλημμένη"
 
-        data.append({
+        new_booking = {
             "name": name,
             "phone": phone,
             "service": service,
             "time": f"{date} {time}",
             "token": str(uuid.uuid4())
-        })
+        }
 
+        data.append(new_booking)
         save(data)
 
-        send_telegram(f"💈 ΝΕΟ ΡΑΝΤΕΒΟΥ\n{name}\n{phone}\n{service}\n{date} {time}")
+        # 🔔 Telegram notification (WORKING PART YOU ALREADY USE)
+        send_telegram(
+            f"💈 ΝΕΟ ΡΑΝΤΕΒΟΥ!\n"
+            f"Όνομα: {name}\n"
+            f"Τηλ: {phone}\n"
+            f"Υπηρεσία: {service}\n"
+            f"Ώρα: {date} {time}"
+        )
 
         return redirect("/success")
 
     # GET
-    slots = generate_slots(today_dt.weekday())
+    slots = generate_slots()
 
     booked = []
-    today_str = today_dt.strftime("%Y-%m-%d")
+    today_str = today.strftime("%Y-%m-%d")
 
     for d in data:
         if d["time"].startswith(today_str):
             booked.append(d["time"].split(" ")[1])
 
-    # 👉 status system (IMPORTANT FIX)
     slot_status = []
-
     for s in slots:
         slot_status.append({
             "time": s,
@@ -132,8 +123,7 @@ def index():
         "index.html",
         services=SERVICES,
         slots=slot_status,
-        today=today_dt.strftime("%Y-%m-%d"),
-        max_date=(today_dt + timedelta(days=7)).strftime("%Y-%m-%d")
+        today=today_str
     )
 
 # ---------------- LOGIN ----------------
@@ -167,42 +157,28 @@ def admin():
         day = today + timedelta(days=i)
         date_str = day.strftime("%Y-%m-%d")
 
-        label = f"{days_gr[day.weekday()]} {day.day} {months_gr[day.month - 1]} {day.year}"
-
-        slots = generate_slots(day.weekday())
-
         day_bookings = []
-        booked_times = []
 
         for idx, d in enumerate(data):
             if d["time"].startswith(date_str):
-                time_only = d["time"].split(" ")[1]
-                booked_times.append(time_only)
-
                 day_bookings.append({
                     "index": idx,
                     "name": d["name"],
                     "phone": d["phone"],
                     "service": d["service"],
-                    "time": time_only
+                    "time": d["time"]
                 })
 
         days.append({
             "date": date_str,
-            "label": label,
-            "slots": slots,
-            "bookings": day_bookings,
-            "booked_times": booked_times
+            "bookings": day_bookings
         })
 
     return render_template("admin.html", days=days)
 
 # ---------------- EDIT ----------------
 @app.route("/admin/edit/<int:index>", methods=["GET", "POST"])
-def admin_edit(index):
-    if not session.get("admin"):
-        return redirect("/login")
-
+def edit(index):
     data = load()
 
     if index < 0 or index >= len(data):
@@ -217,14 +193,11 @@ def admin_edit(index):
         save(data)
         return redirect("/admin")
 
-    return render_template("edit.html", b=data[index], index=index)
+    return render_template("edit.html", b=data[index])
 
 # ---------------- DELETE ----------------
 @app.route("/admin/delete/<int:index>")
-def admin_delete(index):
-    if not session.get("admin"):
-        return redirect("/login")
-
+def delete(index):
     data = load()
 
     if 0 <= index < len(data):
@@ -236,7 +209,8 @@ def admin_delete(index):
 # ---------------- SUCCESS ----------------
 @app.route("/success")
 def success():
-    return render_template("success.html")
+    return "✔ ΡΑΝΤΕΒΟΥ ΚΑΤΑΧΩΡΗΘΗΚΕ"
 
+# ---------------- RUN ----------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
