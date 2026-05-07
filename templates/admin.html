@@ -286,145 +286,61 @@ if ("serviceWorker" in navigator) {
                 🟢 Available Slots
             </div>
 
-            {% for s in day.free_slots %}
+        # ---------------- ADMIN ----------------
+@app.route("/admin")
+def admin():
 
-            <div class="slot free">
+    if not session.get("admin"):
+        return redirect("/login")
 
-                <div class="slot-top">
-                    <div class="time">{{ s.time }}</div>
+    data = load()
+    today = datetime.now()
+    days = []
 
-                    <div class="badge free-badge">
-                        FREE
-                    </div>
-                </div>
+    greek_days = {
+        "Monday": "Δευτέρα",
+        "Tuesday": "Τρίτη",
+        "Wednesday": "Τετάρτη",
+        "Thursday": "Πέμπτη",
+        "Friday": "Παρασκευή",
+        "Saturday": "Σάββατο",
+        "Sunday": "Κυριακή"
+    }
 
-                <form method="POST" action="/admin/add">
+    for i in range(10):
+        day = today + timedelta(days=i)
+        date_str = day.strftime("%Y-%m-%d")
 
-                    <input
-                        type="hidden"
-                        name="date"
-                        value="{{ day.date }}"
-                    >
+        english_day = day.strftime("%A")
+        greek_day = greek_days[english_day]
+        formatted_date = f"{greek_day} {day.strftime('%d/%m/%Y')}"
 
-                    <input
-                        type="hidden"
-                        name="time"
-                        value="{{ s.time }}"
-                    >
+        slots = generate_slots(day.weekday())
+        day_slots = []
 
-                    <input
-                        name="name"
-                        placeholder="Ονοματεπώνυμο"
-                        required
-                    >
+        for s in slots:
+            full_time = f"{date_str} {s}"
 
-                    <input
-                        name="phone"
-                        placeholder="Τηλέφωνο"
-                        required
-                    >
+            booking = None
 
-                    <select name="service">
-                        <option>Κούρεμα</option>
-                        <option>Μούσι</option>
-                        <option>Κούρεμα + Μούσι</option>
-                    </select>
+            for idx, d in enumerate(data):
+                if d["time"] == full_time:
+                    booking = d.copy()
+                    booking["index"] = idx
+                    break
 
-                    <button class="btn add-btn" type="submit">
-                        ➕ Κράτηση
-                    </button>
+            day_slots.append({
+                "time": s,
+                "booking": booking
+            })
 
-                </form>
+        days.append({
+            "date": formatted_date,
+            "real_date": date_str,
+            "slots": day_slots
+        })
 
-            </div>
-
-            {% endfor %}
-
-            <!-- BOOKED -->
-            <div class="section-title">
-                🔴 Booked Appointments
-            </div>
-
-            {% for b in day.bookings %}
-
-            <div class="slot booked">
-
-                <div class="slot-top">
-
-                    <div class="time">
-                        {{ b.time }}
-                    </div>
-
-                    <div class="badge booked-badge">
-                        BOOKED
-                    </div>
-
-                </div>
-
-                <div class="client">
-                    👤 {{ b.name }}<br>
-                    📞 {{ b.phone }}
-                </div>
-
-                <form method="POST" action="/admin/edit/{{ b.index }}">
-
-                    <input
-                        name="name"
-                        value="{{ b.name }}"
-                    >
-
-                    <input
-                        name="phone"
-                        value="{{ b.phone }}"
-                    >
-
-                    <input
-                        type="hidden"
-                        name="date"
-                        value="{{ b.time.split(' ')[0] }}"
-                    >
-
-                    <input
-                        type="hidden"
-                        name="time"
-                        value="{{ b.time.split(' ')[1] }}"
-                    >
-
-                    <div class="actions">
-
-                        <button
-                            type="submit"
-                            class="btn edit-btn"
-                        >
-                            💾 Edit
-                        </button>
-
-                        <a
-                            href="/admin/delete/{{ b.index }}"
-                            class="btn delete-btn"
-                        >
-                            ❌ Delete
-                        </a>
-
-                    </div>
-
-                </form>
-
-            </div>
-
-            {% endfor %}
-
-        </div>
-
-    </div>
-
-    {% endfor %}
-
-</div>
-
-<div class="floating">
-    +
-</div>
+    return render_template("admin.html", days=days)
 
   <script>
 
