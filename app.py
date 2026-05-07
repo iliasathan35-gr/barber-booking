@@ -420,8 +420,66 @@ def check_reminders():
 
         time_left = appointment_time - now
 
-        # 4 ώρες πριν (λόγω UTC)
+        def send_push_to_phone(phone, title, body):
+    subs = load_push_subscriptions()
+
+    for item in subs:
+        if item.get("phone") == phone:
+            try:
+                webpush(
+                    subscription_info=item["subscription"],
+                    data=json.dumps({
+                        "title": title,
+                        "body": body
+                    }),
+                    vapid_private_key=os.environ.get("VAPID_PRIVATE_KEY"),
+                    vapid_claims={
+                        "sub": os.environ.get("VAPID_EMAIL")
+                    }
+                )
+            except Exception as e:
+                print("Push error:", e)
+
+
+def check_reminders():
+    data = load()
+    now = datetime.now()
+    changed = False
+
+    for d in data:
+        if d.get("reminder_sent"):
+            continue
+
+        try:
+            appointment_time = datetime.strptime(
+                d["time"],
+                "%Y-%m-%d %H:%M"
+            )
+        except:
+            continue
+
+        time_left = appointment_time - now
+
+        # 4 ώρες πριν λόγω UTC
         if timedelta(hours=3, minutes=59) <= time_left <= timedelta(hours=4, minutes=1):
+            phone = d.get("phone")
+
+            send_push_to_phone(
+                phone,
+                "Polutelias 💈",
+                "Το ραντεβού σας είναι σε 1 ώρα"
+            )
+
+            d["reminder_sent"] = True
+            changed = True
+
+    if changed:
+        save(data)
+
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(check_reminders, "interval", minutes=1)
+scheduler.start()
 
             phone = d.get("phone")
 
