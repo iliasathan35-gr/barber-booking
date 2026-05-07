@@ -78,23 +78,23 @@ def slots_api():
 
     try:
         dt = datetime.strptime(date, "%Y-%m-%d")
-    except:
+
+    weekday = dt.weekday()
+
+    # Sunday
+    if weekday == 6:
         return jsonify([])
 
-    # ❌ Sunday block
-    if dt.weekday() == 6:
-        return jsonify([])
+    slots = generate_slots(weekday)
 
-    slots = generate_slots(dt.weekday())
+         booked = []
+         for d in data:
+            if d["time"].startswith(date):
+                 booked.append(d["time"].split(" ")[1])
 
-    booked = []
-    for d in data:
-        if d["time"].startswith(date):
-            booked.append(d["time"].split(" ")[1])
+         available = [s for s in slots if s not in booked]
 
-    available = [s for s in slots if s not in booked]
-
-    return jsonify(available)
+        return jsonify(available)
 
 
 # ---------------- HOME ----------------
