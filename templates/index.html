@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Polutelias 💈</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,163 +13,260 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body{
     font-family:'Poppins',sans-serif;
-    background:#0f0f0f;
+    background:#0b0b0b;
     color:white;
     min-height:100vh;
-    padding:20px;
+    overflow-x:hidden;
 }
 
-.container{
-    max-width:500px;
+.app{
+    max-width:520px;
     margin:auto;
+    padding:20px 18px 120px;
 }
 
-.hero{
-    background:linear-gradient(145deg,#1a1a1a,#111);
-    border-radius:24px;
-    padding:30px 20px;
-    margin-bottom:20px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.4);
-    border:1px solid rgba(255,255,255,0.05);
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
 }
 
 .logo{
-    font-size:34px;
-    margin-bottom:10px;
+    width:54px;
+    height:54px;
+    border-radius:18px;
+    background:linear-gradient(135deg,#00c853,#00e676);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:26px;
+    box-shadow:0 10px 25px rgba(0,200,83,0.35);
 }
 
-.hero h1{
-    font-size:30px;
-    margin-bottom:8px;
+.brand h1{
+    font-size:24px;
+    font-weight:700;
+}
+
+.brand p{
+    color:#8f8f8f;
+    font-size:13px;
+}
+
+.hero{
+    background:linear-gradient(145deg,#171717,#111);
+    border-radius:32px;
+    padding:24px;
+    margin-bottom:20px;
+    position:relative;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.04);
+    box-shadow:0 20px 50px rgba(0,0,0,0.4);
+}
+
+.hero::before{
+    content:'';
+    position:absolute;
+    width:180px;
+    height:180px;
+    border-radius:50%;
+    background:rgba(0,200,83,0.08);
+    top:-60px;
+    right:-60px;
+}
+
+.hero h2{
+    font-size:28px;
+    margin-bottom:10px;
+    position:relative;
+    z-index:2;
 }
 
 .hero p{
     color:#aaa;
-    font-size:14px;
+    line-height:1.5;
+    position:relative;
+    z-index:2;
 }
 
-.card{
-    background:#171717;
-    border-radius:24px;
-    padding:20px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.35);
-    border:1px solid rgba(255,255,255,0.05);
+.glass{
+    backdrop-filter:blur(20px);
+    background:rgba(25,25,25,0.9);
+    border:1px solid rgba(255,255,255,0.04);
+    border-radius:30px;
+    padding:22px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.4);
+}
+
+.section{
+    margin-bottom:22px;
 }
 
 .section-title{
+    margin-bottom:12px;
     font-size:15px;
-    margin-bottom:10px;
-    color:#bbb;
     font-weight:600;
+    color:#bbb;
 }
 
 input,
 select{
     width:100%;
-    background:#222;
-    color:white;
+    background:#1d1d1d;
     border:none;
-    border-radius:16px;
-    padding:16px;
-    margin-bottom:14px;
+    color:white;
+    padding:18px;
+    border-radius:18px;
     font-size:15px;
     outline:none;
+    transition:0.2s;
 }
 
 input:focus,
 select:focus{
+    transform:scale(1.01);
     border:1px solid #00c853;
 }
 
+.slots-wrapper{
+    overflow-x:auto;
+    padding-bottom:6px;
+}
+
 .slots{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:10px;
-    margin-top:10px;
+    display:flex;
+    gap:12px;
+    min-width:max-content;
 }
 
 .slot{
-    background:#262626;
-    border-radius:16px;
-    padding:14px 10px;
+    min-width:90px;
+    padding:16px 10px;
+    background:#202020;
+    border-radius:22px;
     text-align:center;
     cursor:pointer;
-    transition:0.2s;
+    transition:0.22s;
     font-weight:600;
     border:1px solid transparent;
+    user-select:none;
 }
 
 .slot:hover{
-    transform:scale(1.03);
-    background:#333;
+    transform:translateY(-2px);
 }
 
 .selected{
-    background:#00c853 !important;
+    background:linear-gradient(135deg,#00c853,#00e676);
     color:white;
     border:1px solid #00ff80;
-    box-shadow:0 0 12px rgba(0,200,83,0.5);
+    box-shadow:0 10px 25px rgba(0,200,83,0.35);
 }
 
 .book-btn{
     width:100%;
-    margin-top:18px;
     border:none;
+    padding:20px;
+    border-radius:24px;
     background:linear-gradient(135deg,#00c853,#00e676);
     color:white;
-    padding:18px;
-    border-radius:18px;
     font-size:17px;
     font-weight:700;
     cursor:pointer;
-    transition:0.2s;
+    transition:0.25s;
+    box-shadow:0 12px 25px rgba(0,200,83,0.3);
 }
 
 .book-btn:hover{
     transform:translateY(-2px);
 }
 
-.info{
-    margin-top:18px;
+.stats{
     display:flex;
-    gap:10px;
+    gap:12px;
     overflow-x:auto;
+    margin-top:22px;
 }
 
-.info-box{
+.stat-card{
     min-width:120px;
-    background:#1f1f1f;
-    border-radius:18px;
-    padding:14px;
-    text-align:center;
-    border:1px solid rgba(255,255,255,0.05);
+    background:#181818;
+    border-radius:24px;
+    padding:18px;
+    border:1px solid rgba(255,255,255,0.04);
 }
 
-.info-box h3{
-    font-size:14px;
-    margin-bottom:4px;
-}
-
-.info-box p{
+.stat-card h3{
+    font-size:13px;
     color:#aaa;
-    font-size:12px;
+    margin-bottom:8px;
+}
+
+.stat-card p{
+    font-size:18px;
+    font-weight:700;
+}
+
+.bottom-nav{
+    position:fixed;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:18px;
+    width:calc(100% - 32px);
+    max-width:500px;
+    background:rgba(20,20,20,0.95);
+    border:1px solid rgba(255,255,255,0.05);
+    backdrop-filter:blur(20px);
+    border-radius:28px;
+    display:flex;
+    justify-content:space-around;
+    padding:16px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.45);
+}
+
+.nav-item{
+    text-align:center;
+    color:#bbb;
+    font-size:13px;
+}
+
+.nav-item.active{
+    color:#00e676;
 }
 
 .no-slots{
-    background:#222;
-    border-radius:16px;
-    padding:16px;
+    width:100%;
+    background:#1e1e1e;
+    border-radius:22px;
+    padding:18px;
     text-align:center;
-    color:#aaa;
+    color:#999;
 }
 
-@media(max-width:500px){
-    .slots{
-        grid-template-columns:repeat(2,1fr);
+.fade-in{
+    animation:fade 0.35s ease;
+}
+
+@keyframes fade{
+    from{
+        opacity:0;
+        transform:translateY(8px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
     }
 }
 </style>
@@ -177,49 +274,75 @@ select:focus{
 
 <body>
 
-<div class="container">
+<div class="app">
 
-    <div class="hero">
-        <div class="logo">💈</div>
-        <h1>Polutelias</h1>
-        <p>Premium Barber Booking Experience</p>
+    <div class="topbar">
+
+        <div class="brand">
+            <div class="logo">💈</div>
+
+            <div>
+                <h1>Polutelias</h1>
+                <p>Premium Barber Experience</p>
+            </div>
+        </div>
+
     </div>
 
-    <div class="card">
+    <div class="hero fade-in">
+        <h2>Κλείσε το επόμενο σου ραντεβού</h2>
+        <p>
+            Επίλεξε υπηρεσία, ημέρα και ώρα εύκολα μέσα από το mobile booking app.
+        </p>
+    </div>
+
+    <div class="glass fade-in">
 
         <form method="POST">
 
-            <div class="section-title">👤 Τα στοιχεία σου</div>
+            <div class="section">
+                <div class="section-title">👤 Στοιχεία</div>
 
-            <input name="name" placeholder="Όνομα" required>
+                <input name="name" placeholder="Όνομα" required>
+            </div>
 
-            <input name="phone" placeholder="Τηλέφωνο" required>
+            <div class="section">
+                <input name="phone" placeholder="Τηλέφωνο" required>
+            </div>
 
-            <div class="section-title">✂ Υπηρεσία</div>
+            <div class="section">
+                <div class="section-title">✂ Υπηρεσία</div>
 
-            <select name="service" required>
-                <option value="">Επίλεξε υπηρεσία</option>
+                <select name="service" required>
+                    <option value="">Επίλεξε υπηρεσία</option>
 
-                {% for s in services %}
-                    <option>{{ s }}</option>
-                {% endfor %}
-            </select>
+                    {% for s in services %}
+                        <option>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-            <div class="section-title">📅 Ημερομηνία</div>
+            <div class="section">
+                <div class="section-title">📅 Ημερομηνία</div>
 
-            <input
-                type="date"
-                id="date"
-                name="date"
-                value="{{ today }}"
-                min="{{ today }}"
-                max="{{ max_date }}"
-                required
-            >
+                <input
+                    type="date"
+                    id="date"
+                    name="date"
+                    value="{{ today }}"
+                    min="{{ today }}"
+                    max="{{ max_date }}"
+                    required
+                >
+            </div>
 
-            <div class="section-title">⏰ Διάλεξε ώρα</div>
+            <div class="section">
+                <div class="section-title">⏰ Διαθέσιμες ώρες</div>
 
-            <div class="slots" id="slots"></div>
+                <div class="slots-wrapper">
+                    <div class="slots" id="slots"></div>
+                </div>
+            </div>
 
             <input type="hidden" name="time" id="timeInput" required>
 
@@ -229,25 +352,41 @@ select:focus{
 
         </form>
 
-        <div class="info">
-            <div class="info-box">
-                <h3>📍 Location</h3>
-                <p>Larisa-stomio</p>
-            </div>
+        <div class="stats">
 
-            <div class="info-box">
+            <div class="stat-card">
                 <h3>⭐ Rating</h3>
                 <p>5.0</p>
             </div>
 
-            <div class="info-box">
-                <h3>⏱ Duration</h3>
-                <p>30-45 λεπτά</p>
+            <div class="stat-card">
+                <h3>📍 Location</h3>
+                <p>Larisa</p>
             </div>
+
+            <div class="stat-card">
+                <h3>⏱ Duration</h3>
+                <p>45 min</p>
+            </div>
+
         </div>
 
     </div>
 
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-item active">
+        🏠<br>Home
+    </div>
+
+    <div class="nav-item">
+        📅<br>Bookings
+    </div>
+
+    <div class="nav-item">
+        👤<br>Profile
+    </div>
 </div>
 
 <script>
@@ -290,7 +429,7 @@ function loadSlots(date){
 
             let div = document.createElement("div");
 
-            div.className = "slot";
+            div.className = "slot fade-in";
 
             div.innerText = time;
 
@@ -310,13 +449,10 @@ function loadSlots(date){
 }
 
 
-// DATE CHANGE
-
 document.getElementById("date").addEventListener("input", function () {
 
     let selected = new Date(this.value);
 
-    // Κυριακή
     if (selected.getDay() === 0) {
 
         alert("❌ Τις Κυριακές είμαστε κλειστά");
@@ -333,7 +469,6 @@ document.getElementById("date").addEventListener("input", function () {
 });
 
 
-// INITIAL LOAD
 window.onload = function(){
 
     let date = document.getElementById("date").value;
