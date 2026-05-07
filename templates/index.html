@@ -494,6 +494,18 @@ setInterval(function(){
 
 </script>
 
+<script>
+
+if ("serviceWorker" in navigator) {
+
+    navigator.serviceWorker.register("/static/service-worker.js")
+
+    .then(() => console.log("PWA Ready"));
+
+}
+
+</script>
+    
 </body>
 </html>
 ```
