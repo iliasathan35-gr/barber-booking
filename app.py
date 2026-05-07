@@ -107,7 +107,7 @@ def index():
         except:
             return "❌ Λάθος ημερομηνία/ώρα"
 
-        datetime.now()
+        now = datetime.now()
 
         if dt.weekday() == 6:
             return "❌ Κυριακή κλειστά"
