@@ -11,8 +11,6 @@ app.secret_key = "secret123"
 DATA_FILE = "data.json"
 
 
-def now_gr():
-    return datetime.now(ZoneInfo("Europe/Athens"))
 
 # ---------------- DATA ----------------
 def load():
@@ -40,17 +38,24 @@ def send_telegram(text):
         pass
 
 
+# 🇬🇷 Greece time helper
+def now_gr():
+    return datetime.now(ZoneInfo("Europe/Athens"))
+
+
 # ---------------- SLOTS ----------------
 def generate_slots(day):
-    if day == 6:
+    if day == 6:  # Sunday
         return []
 
     slots = []
 
+    # Saturday
     if day == 5:
         start = datetime(2000, 1, 1, 10, 0)
         end = datetime(2000, 1, 1, 14, 0)
     else:
+        # weekdays
         start = datetime(2000, 1, 1, 11, 0)
         end = datetime(2000, 1, 1, 20, 0)
 
@@ -62,10 +67,12 @@ def generate_slots(day):
 
 
 SERVICES = ["Κούρεμα", "Μούσι", "Κούρεμα + Μούσι"]
-from flask import jsonify
 
+
+# ---------------- SLOTS API ----------------
 @app.route("/slots")
 def slots_api():
+
     date = request.args.get("date")
     data = load()
 
@@ -74,7 +81,7 @@ def slots_api():
     except:
         return jsonify([])
 
-    # ❌ Κυριακή
+    # ❌ Sunday block
     if dt.weekday() == 6:
         return jsonify([])
 
