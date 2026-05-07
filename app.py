@@ -1,11 +1,5 @@
 from flask import Flask, render_template, request, redirect, session
 from datetime import datetime, timedelta
-from datetime import datetime
-import pytz
-
-def now_gr():
-    tz = pytz.timezone("Europe/Athens")
-    return datetime.now(tz)
 import json
 import uuid
 import requests
@@ -14,7 +8,6 @@ app = Flask(__name__)
 app.secret_key = "secret123"
 
 DATA_FILE = "data.json"
-
 
 
 # ---------------- DATA ----------------
@@ -43,24 +36,17 @@ def send_telegram(text):
         pass
 
 
-# 🇬🇷 Greece time helper
-def now_gr():
-    return datetime.now(ZoneInfo("Europe/Athens"))
-
-
 # ---------------- SLOTS ----------------
 def generate_slots(day):
-    if day == 6:  # Sunday
+    if day == 6:
         return []
 
     slots = []
 
-    # Saturday
     if day == 5:
         start = datetime(2000, 1, 1, 10, 0)
         end = datetime(2000, 1, 1, 14, 0)
     else:
-        # weekdays
         start = datetime(2000, 1, 1, 11, 0)
         end = datetime(2000, 1, 1, 20, 0)
 
@@ -72,25 +58,32 @@ def generate_slots(day):
 
 
 SERVICES = ["Κούρεμα", "Μούσι", "Κούρεμα + Μούσι"]
+from flask import jsonify
 
-
-# ---------------- SLOTS API ----------------
 @app.route("/slots")
 def slots_api():
-
     date = request.args.get("date")
     data = load()
 
     try:
-       dt = datetime.strptime(date, "%Y-%m-%d")
+        dt = datetime.strptime(date, "%Y-%m-%d")
+    except:
+        return jsonify([])
 
-weekday = dt.weekday()
+    # ❌ Κυριακή
+    if dt.weekday() == 6:
+        return jsonify([])
 
-# Sunday
-if weekday == 6:
-    return jsonify([])
+    slots = generate_slots(dt.weekday())
 
-slots = generate_slots(weekday)
+    booked = []
+    for d in data:
+        if d["time"].startswith(date):
+            booked.append(d["time"].split(" ")[1])
+
+    available = [s for s in slots if s not in booked]
+
+    return jsonify(available)
 
 
 # ---------------- HOME ----------------
