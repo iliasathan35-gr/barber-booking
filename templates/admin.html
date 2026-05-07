@@ -5,11 +5,12 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<style>
+<link rel="manifest" href="/static/admin-manifest.json">
+<meta name="theme-color" content="#00c853">
 
+<style>
 *{
     margin:0;
     padding:0;
@@ -61,11 +62,6 @@ body{
     font-size:16px;
     font-weight:600;
     cursor:pointer;
-    transition:0.2s;
-}
-
-.toggle-btn:hover{
-    transform:translateY(-2px);
 }
 
 .box{
@@ -92,9 +88,20 @@ body{
     border:1px solid rgba(0,255,128,0.15);
 }
 
-.booked{
-    background:#241212;
-    border:1px solid rgba(255,0,0,0.12);
+.service-haircut{
+    background:#0d47a1;
+    border:1px solid #2196f3;
+}
+
+.service-beard{
+    background:#f9a825;
+    color:black;
+    border:1px solid #ffeb3b;
+}
+
+.service-combo{
+    background:#b71c1c;
+    border:1px solid #ff5252;
 }
 
 .slot-top{
@@ -114,18 +121,10 @@ body{
     border-radius:14px;
     font-size:12px;
     font-weight:600;
-}
-
-.badge.free-badge{
-    background:#00c853;
-}
-
-.badge.booked-badge{
-    background:#ff5252;
+    background:rgba(255,255,255,0.15);
 }
 
 .client{
-    color:#ddd;
     margin-bottom:14px;
 }
 
@@ -146,11 +145,6 @@ select{
     font-size:14px;
 }
 
-input:focus,
-select:focus{
-    border:1px solid #00c853;
-}
-
 .actions{
     display:flex;
     gap:10px;
@@ -164,7 +158,8 @@ select:focus{
     border-radius:16px;
     font-weight:600;
     cursor:pointer;
-    transition:0.2s;
+    text-align:center;
+    text-decoration:none;
 }
 
 .add-btn{
@@ -180,30 +175,9 @@ select:focus{
 .delete-btn{
     background:#ff1744;
     color:white;
-    text-decoration:none;
     display:flex;
     align-items:center;
     justify-content:center;
-}
-
-.btn:hover{
-    transform:scale(1.02);
-}
-
-.floating{
-    position:fixed;
-    bottom:25px;
-    right:25px;
-    width:65px;
-    height:65px;
-    border-radius:50%;
-    background:linear-gradient(135deg,#00c853,#00e676);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:34px;
-    color:white;
-    box-shadow:0 12px 25px rgba(0,200,83,0.4);
 }
 
 @keyframes fade{
@@ -216,27 +190,9 @@ select:focus{
         transform:translateY(0);
     }
 }
-
 </style>
-
-<link rel="manifest" href="/static/admin-manifest.json">
-
-<meta name="theme-color" content="#00c853">
-    
 </head>
 
-<script>
-
-if ("serviceWorker" in navigator) {
-
-    navigator.serviceWorker.register("/static/service-worker.js")
-
-    .then(() => console.log("Admin PWA Ready"));
-
-}
-
-</script>
-    
 <body>
 
 <div class="container">
@@ -250,144 +206,94 @@ if ("serviceWorker" in navigator) {
 
     <div class="day">
 
-        <button
-            type="button"
-            class="toggle-btn"
-            onclick="toggle({{ loop.index }})"
-        >
+        <button type="button" class="toggle-btn" onclick="toggle({{ loop.index }})">
             📅 {{ day.date }}
         </button>
 
         <div class="box" id="box{{ loop.index }}">
 
-            <!-- FREE -->
             <div class="section-title">
-                🟢 Available Slots
+                Πρόγραμμα ημέρας
             </div>
 
-            {% for s in day.free_slots %}
+            {% for s in day.slots %}
 
-            <div class="slot free">
+            <div class="slot
+                {% if s.booking %}
+                    {% if s.booking.service == 'Κούρεμα' %} service-haircut
+                    {% elif s.booking.service == 'Μούσι' %} service-beard
+                    {% elif s.booking.service == 'Κούρεμα + Μούσι' %} service-combo
+                    {% endif %}
+                {% else %}
+                    free
+                {% endif %}
+            ">
 
                 <div class="slot-top">
                     <div class="time">{{ s.time }}</div>
 
-                    <div class="badge free-badge">
-                        FREE
-                    </div>
+                    {% if s.booking %}
+                        <div class="badge">BOOKED</div>
+                    {% else %}
+                        <div class="badge">FREE</div>
+                    {% endif %}
                 </div>
 
-                <form method="POST" action="/admin/add">
+                {% if s.booking %}
 
-                    <input
-                        type="hidden"
-                        name="date"
-                        value="{{ day.date }}"
-                    >
-
-                    <input
-                        type="hidden"
-                        name="time"
-                        value="{{ s.time }}"
-                    >
-
-                    <input
-                        name="name"
-                        placeholder="Ονοματεπώνυμο"
-                        required
-                    >
-
-                    <input
-                        name="phone"
-                        placeholder="Τηλέφωνο"
-                        required
-                    >
-
-                    <select name="service">
-                        <option>Κούρεμα</option>
-                        <option>Μούσι</option>
-                        <option>Κούρεμα + Μούσι</option>
-                    </select>
-
-                    <button class="btn add-btn" type="submit">
-                        ➕ Κράτηση
-                    </button>
-
-                </form>
-
-            </div>
-
-            {% endfor %}
-
-            <!-- BOOKED -->
-            <div class="section-title">
-                🔴 Booked Appointments
-            </div>
-
-            {% for b in day.bookings %}
-
-            <div class="slot booked">
-
-                <div class="slot-top">
-
-                    <div class="time">
-                        {{ b.time }}
+                    <div class="client">
+                        👤 {{ s.booking.name }}<br>
+                        📞 {{ s.booking.phone }}<br>
+                        ✂ {{ s.booking.service }}
                     </div>
 
-                    <div class="badge booked-badge">
-                        BOOKED
-                    </div>
+                    <form method="POST" action="/admin/edit/{{ s.booking.index }}">
 
-                </div>
+                        <input name="name" value="{{ s.booking.name }}">
+                        <input name="phone" value="{{ s.booking.phone }}">
 
-                <div class="client">
-                    👤 {{ b.name }}<br>
-                    📞 {{ b.phone }}
-                </div>
+                        <select name="service">
+                            <option {% if s.booking.service=="Κούρεμα" %}selected{% endif %}>Κούρεμα</option>
+                            <option {% if s.booking.service=="Μούσι" %}selected{% endif %}>Μούσι</option>
+                            <option {% if s.booking.service=="Κούρεμα + Μούσι" %}selected{% endif %}>Κούρεμα + Μούσι</option>
+                        </select>
 
-                <form method="POST" action="/admin/edit/{{ b.index }}">
+                        <input type="hidden" name="date" value="{{ day.real_date }}">
+                        <input type="hidden" name="time" value="{{ s.time }}">
 
-                    <input
-                        name="name"
-                        value="{{ b.name }}"
-                    >
+                        <div class="actions">
+                            <button type="submit" class="btn edit-btn">💾 Edit</button>
 
-                    <input
-                        name="phone"
-                        value="{{ b.phone }}"
-                    >
+                            <a href="/admin/delete/{{ s.booking.index }}" class="btn delete-btn">
+                                ❌ Delete
+                            </a>
+                        </div>
 
-                    <input
-                        type="hidden"
-                        name="date"
-                        value="{{ b.time.split(' ')[0] }}"
-                    >
+                    </form>
 
-                    <input
-                        type="hidden"
-                        name="time"
-                        value="{{ b.time.split(' ')[1] }}"
-                    >
+                {% else %}
 
-                    <div class="actions">
+                    <form method="POST" action="/admin/add">
 
-                        <button
-                            type="submit"
-                            class="btn edit-btn"
-                        >
-                            💾 Edit
+                        <input type="hidden" name="date" value="{{ day.real_date }}">
+                        <input type="hidden" name="time" value="{{ s.time }}">
+
+                        <input name="name" placeholder="Ονοματεπώνυμο" required>
+                        <input name="phone" placeholder="Τηλέφωνο" required>
+
+                        <select name="service">
+                            <option>Κούρεμα</option>
+                            <option>Μούσι</option>
+                            <option>Κούρεμα + Μούσι</option>
+                        </select>
+
+                        <button class="btn add-btn" type="submit">
+                            ➕ Κράτηση
                         </button>
 
-                        <a
-                            href="/admin/delete/{{ b.index }}"
-                            class="btn delete-btn"
-                        >
-                            ❌ Delete
-                        </a>
+                    </form>
 
-                    </div>
-
-                </form>
+                {% endif %}
 
             </div>
 
@@ -400,28 +306,6 @@ if ("serviceWorker" in navigator) {
     {% endfor %}
 
 </div>
-
-<div class="floating">
-    +
-</div>
-
-  <script>
-
-function toggle(id){
-
-    let box = document.getElementById("box"+id);
-
-    if(box.style.display === "block"){
-
-        box.style.display = "none";
-
-    } else {
-
-        box.style.display = "block";
-    }
-}
-
-</script>
 
 <script>
 function toggle(id){
@@ -439,13 +323,12 @@ function toggle(id){
 // LIVE UPDATE ΧΩΡΙΣ ΝΑ ΚΛΕΙΝΟΥΝ ΟΙ ΜΕΡΕΣ
 setInterval(function(){
 
-    // μην κάνει update όσο γράφεις σε input/select
     const active = document.activeElement;
+
     if(active && (active.tagName === "INPUT" || active.tagName === "SELECT")){
         return;
     }
 
-    // κρατάμε ποιες μέρες είναι ανοιχτές
     let openBoxes = [];
 
     document.querySelectorAll(".box").forEach(box => {
@@ -461,10 +344,8 @@ setInterval(function(){
             let parser = new DOMParser();
             let doc = parser.parseFromString(html, "text/html");
 
-            // παίρνουμε μόνο το περιεχόμενο του body
             document.body.innerHTML = doc.body.innerHTML;
 
-            // ξανανοίγουμε όσες ήταν ανοιχτές
             openBoxes.forEach(id => {
                 let box = document.getElementById(id);
                 if(box){
@@ -475,7 +356,14 @@ setInterval(function(){
         });
 
 }, 7000);
+
+
+// PWA
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/static/service-worker.js")
+    .then(() => console.log("Admin PWA Ready"));
+}
 </script>
-    
+
 </body>
 </html>
