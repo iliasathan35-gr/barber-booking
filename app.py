@@ -330,6 +330,55 @@ def admin_delete(index):
 def success():
     return render_template("success.html")
 
+PUSH_FILE = "push_subscriptions.json"
+
+def load_push_subscriptions():
+    try:
+        with open(PUSH_FILE, "r") as f:
+            return json.load(f)
+    except:
+        return []
+
+def save_push_subscriptions(data):
+    with open(PUSH_FILE, "w") as f:
+        json.dump(data, f, indent=2)
+
+@app.route("/vapid-public-key")
+def vapid_public_key():
+    return {"publicKey": os.environ.get("VAPID_PUBLIC_KEY")}
+
+@app.route("/subscribe", methods=["POST"])
+def subscribe():
+    sub = request.get_json()
+    subs = load_push_subscriptions()
+
+    if sub not in subs:
+        subs.append(sub)
+        save_push_subscriptions(subs)
+
+    return {"success": True}
+
+@app.route("/test-push")
+def test_push():
+    subs = load_push_subscriptions()
+
+    for sub in subs:
+        try:
+            webpush(
+                subscription_info=sub,
+                data=json.dumps({
+                    "title": "Polutelias 💈",
+                    "body": "Δοκιμαστική ειδοποίηση από το app!"
+                }),
+                vapid_private_key=os.environ.get("VAPID_PRIVATE_KEY"),
+                vapid_claims={
+                    "sub": os.environ.get("VAPID_EMAIL")
+                }
+            )
+        except Exception as e:
+            print("Push error:", e)
+
+    return "Push sent"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
