@@ -391,6 +391,9 @@ def send_push_to_phone(phone, title, body):
             except Exception as e:
                 print("Push error:", e)
 
+# 4 ώρες πριν (λόγω UTC)
+if timedelta(hours=3, minutes=59) <= time_left <= timedelta(hours=4, minutes=1):
+
 @app.route("/test-push-phone/<phone>")
 def test_push_phone(phone):
     send_push_to_phone(
@@ -400,6 +403,63 @@ def test_push_phone(phone):
     )
 
     return "Push sent to phone"
+
+from apscheduler.schedulers.background import BackgroundScheduler
+
+
+def check_reminders():
+
+    data = load()
+
+    now = datetime.now()
+
+    changed = False
+
+    for d in data:
+
+        if d.get("reminder_sent"):
+            continue
+
+        try:
+
+            appointment_time = datetime.strptime(
+                d["time"],
+                "%Y-%m-%d %H:%M"
+            )
+
+        except:
+            continue
+
+        time_left = appointment_time - now
+
+        # 4 ώρες πριν (λόγω UTC)
+        if timedelta(hours=3, minutes=59) <= time_left <= timedelta(hours=4, minutes=1):
+
+            phone = d.get("phone")
+
+            send_push_to_phone(
+                phone,
+                "Polutelias 💈",
+                "Το ραντεβού σας είναι σε 1 ώρα"
+            )
+
+            d["reminder_sent"] = True
+
+            changed = True
+
+    if changed:
+        save(data)
+
+
+scheduler = BackgroundScheduler()
+
+scheduler.add_job(
+    check_reminders,
+    "interval",
+    minutes=1
+)
+
+scheduler.start()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
