@@ -392,8 +392,6 @@ def send_push_to_phone(phone, title, body):
             except Exception as e:
                 print("Push error:", e)
 
-# 4 ώρες πριν (λόγω UTC)
-if timedelta(hours=3, minutes=59) <= time_left <= timedelta(hours=4, minutes=1):
 
 def check_reminders():
 
