@@ -139,7 +139,11 @@ def index():
         })
 
         save(data)
-
+        send_push_to_admins(
+    "💈 Νέο ραντεβού",
+    f"{name} - {service} - {date} {time}"
+)
+        
         # 🔔 TELEGRAM NOTIFICATION
         send_telegram(
             f"💈 ΝΕΟ ΡΑΝΤΕΒΟΥ!\n"
