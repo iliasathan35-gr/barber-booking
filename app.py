@@ -418,15 +418,11 @@ def check_reminders():
         time_left = appointment_time - now
 
 def send_push_to_phone(phone, title, body):
-
     subs = load_push_subscriptions()
 
     for item in subs:
-
         if item.get("phone") == phone:
-
             try:
-
                 webpush(
                     subscription_info=item["subscription"],
                     data=json.dumps({
@@ -438,10 +434,9 @@ def send_push_to_phone(phone, title, body):
                         "sub": os.environ.get("VAPID_EMAIL")
                     }
                 )
-
             except Exception as e:
-
                 print("Push error:", e)
+
 
 def check_reminders():
     data = load()
@@ -478,6 +473,7 @@ def check_reminders():
     if changed:
         save(data)
 
+
 try:
     from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -487,32 +483,6 @@ try:
 
 except Exception as e:
     print("Scheduler error:", e)
-
-            phone = d.get("phone")
-
-            send_push_to_phone(
-                phone,
-                "Polutelias 💈",
-                "Το ραντεβού σας είναι σε 1 ώρα"
-            )
-
-            d["reminder_sent"] = True
-
-            changed = True
-
-    if changed:
-        save(data)
-
-
-scheduler = BackgroundScheduler()
-
-scheduler.add_job(
-    check_reminders,
-    "interval",
-    minutes=1
-)
-
-scheduler.start()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
