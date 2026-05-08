@@ -246,7 +246,9 @@ select{
 
                     <div class="client">
                         👤 {{ s.booking.name }}<br>
-                        📞 {{ s.booking.phone }}<br>
+                        📞 <a href="tel:{{ s.booking.phone }}" style="color:inherit; text-decoration:none;">
+    {{ s.booking.phone }}
+</a>
                         ✂ {{ s.booking.service }}
                     </div>
 
