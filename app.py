@@ -27,6 +27,23 @@ def save(data):
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
+BLOCKED_FILE = "blocked.json"
+
+
+def load_blocked():
+    try:
+        with open(BLOCKED_FILE, "r") as f:
+            return json.load(f)
+    except:
+        return {
+            "days": [],
+            "slots": []
+        }
+
+
+def save_blocked(data):
+    with open(BLOCKED_FILE, "w") as f:
+        json.dump(data, f, indent=2)
 
 # ---------------- TELEGRAM ----------------
 def send_telegram(text):
