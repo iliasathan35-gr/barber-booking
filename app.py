@@ -578,5 +578,73 @@ def send_push_to_admins(title, body):
         except Exception as e:
             print("Admin push error:", e)
 
+@app.route("/admin/block-day/<date>")
+def block_day(date):
+    if not session.get("admin"):
+        return redirect("/login")
+
+    blocked = load_blocked()
+
+    if date not in blocked["days"]:
+        blocked["days"].append(date)
+
+    save_blocked(blocked)
+
+    return redirect("/admin")
+
+
+@app.route("/admin/unblock-day/<date>")
+def unblock_day(date):
+    if not session.get("admin"):
+        return redirect("/login")
+
+    blocked = load_blocked()
+
+    blocked["days"] = [
+        d for d in blocked["days"]
+        if d != date
+    ]
+
+    save_blocked(blocked)
+
+    return redirect("/admin")
+
+
+@app.route("/admin/block-slot/<date>/<time>")
+def block_slot(date, time):
+    if not session.get("admin"):
+        return redirect("/login")
+
+    blocked = load_blocked()
+
+    item = {
+        "date": date,
+        "time": time
+    }
+
+    if item not in blocked["slots"]:
+        blocked["slots"].append(item)
+
+    save_blocked(blocked)
+
+    return redirect("/admin")
+
+
+@app.route("/admin/unblock-slot/<date>/<time>")
+def unblock_slot(date, time):
+    if not session.get("admin"):
+        return redirect("/login")
+
+    blocked = load_blocked()
+
+    blocked["slots"] = [
+        b for b in blocked["slots"]
+        if not (b["date"] == date and b["time"] == time)
+    ]
+
+    save_blocked(blocked)
+
+    return redirect("/admin")
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
