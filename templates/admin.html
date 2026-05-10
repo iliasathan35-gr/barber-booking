@@ -318,12 +318,27 @@ select{
 
                         <button class="btn add-btn" type="submit">
                             ➕ Κράτηση
-                        </button>
+</button>
 
-                    </form>
+</form>
 
-                {% endif %}
+{% if s.blocked %}
 
+<a href="/admin/unblock-slot/{{ day.real_date }}/{{ s.time }}"
+   class="btn add-btn">
+    ✅ Unblock ώρα
+</a>
+
+{% else %}
+
+<a href="/admin/block-slot/{{ day.real_date }}/{{ s.time }}"
+   class="btn delete-btn">
+    🚫 Block ώρα
+</a>
+
+{% endif %}
+
+{% endif %}
             </div>
 
             {% endfor %}
