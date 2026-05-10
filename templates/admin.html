@@ -209,17 +209,41 @@ select{
 
     <div class="day">
 
-        <button type="button" class="toggle-btn" onclick="toggle({{ loop.index }})">
-            📅 {{ day.date }}
-        </button>
+       <button type="button"
+        class="toggle-btn"
+        onclick="toggle({{ loop.index }})">
 
-        <div class="box" id="box{{ loop.index }}">
+    📅 {{ day.date }}
 
-            <div class="section-title">
-                Πρόγραμμα ημέρας
-            </div>
+</button>
 
-            {% for s in day.slots %}
+
+<div class="actions">
+
+    <a href="/admin/block-day/{{ day.real_date }}"
+       class="btn delete-btn">
+
+        🚫 Block Day
+
+    </a>
+
+    <a href="/admin/unblock-day/{{ day.real_date }}"
+       class="btn add-btn">
+
+        ✅ Unblock Day
+
+    </a>
+
+</div>
+
+
+<div class="box" id="box{{ loop.index }}">
+
+    <div class="section-title">
+        Πρόγραμμα ημέρας
+    </div>
+
+    {% for s in day.slots %}
 
             <div class="slot
                 {% if s.booking %}
