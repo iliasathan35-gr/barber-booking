@@ -226,15 +226,16 @@ def logout():
 
 
 # ---------------- ADMIN ----------------
+# ---------------- ADMIN ----------------
 @app.route("/admin")
 def admin():
-
     if not session.get("admin"):
         return redirect("/login")
 
     data = load()
     blocked = load_blocked()
     today = datetime.now()
+
     days = []
 
     greek_days = {
@@ -271,18 +272,18 @@ def admin():
 
             is_blocked = False
 
-if date_str in blocked["days"]:
-    is_blocked = True
+            if date_str in blocked["days"]:
+                is_blocked = True
 
-for b in blocked["slots"]:
-    if b["date"] == date_str and b["time"] == s:
-        is_blocked = True
+            for b in blocked["slots"]:
+                if b["date"] == date_str and b["time"] == s:
+                    is_blocked = True
 
             day_slots.append({
-    "time": s,
-    "booking": booking,
-    "blocked": is_blocked
-})
+                "time": s,
+                "booking": booking,
+                "blocked": is_blocked
+            })
 
         days.append({
             "date": formatted_date,
