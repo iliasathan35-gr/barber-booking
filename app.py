@@ -226,7 +226,6 @@ def logout():
 
 
 # ---------------- ADMIN ----------------
-# ---------------- ADMIN ----------------
 @app.route("/admin")
 def admin():
     if not session.get("admin"):
