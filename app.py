@@ -49,8 +49,6 @@ def load():
 
     return data
 
-    return data
-
 
 def save(data):
     pass
