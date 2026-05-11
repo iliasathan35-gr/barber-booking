@@ -686,6 +686,166 @@ function startCustomerVoice(){
     recognition.start();
 }
 </script>
+
+<script>
+
+function customerSpeak(text){
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = "el-GR";
+    window.speechSynthesis.speak(msg);
+}
+
+function setServiceFromVoice(text){
+
+    const service =
+        document.querySelector("select[name='service']");
+
+    if(text.includes("κούρεμα") && text.includes("μούσι")){
+
+        service.value = "Κούρεμα + Μούσι";
+
+    } else if(text.includes("μούσι")){
+
+        service.value = "Μούσι";
+
+    } else if(text.includes("κούρεμα")){
+
+        service.value = "Κούρεμα";
+
+    }
+}
+
+function getDateFromVoice(text){
+
+    const today = new Date();
+
+    if(text.includes("αύριο")){
+        today.setDate(today.getDate() + 1);
+    }
+
+    const yyyy = today.getFullYear();
+    const mm =
+        String(today.getMonth()+1).padStart(2,"0");
+
+    const dd =
+        String(today.getDate()).padStart(2,"0");
+
+    return `${yyyy}-${mm}-${dd}`;
+}
+
+function getTimeFromVoice(text){
+
+    let match =
+        text.match(/(\d{1,2})([:.](\d{2}))?/);
+
+    if(!match){
+        return null;
+    }
+
+    let hour = parseInt(match[1]);
+
+    let minute =
+        match[3] ? match[3] : "00";
+
+    if(hour >= 1 && hour <= 9){
+        hour += 12;
+    }
+
+    return String(hour).padStart(2,"0")
+        + ":" + minute;
+}
+
+async function applyVoiceBooking(text){
+
+    text = text.toLowerCase();
+
+    setServiceFromVoice(text);
+
+    const date = getDateFromVoice(text);
+
+    const time = getTimeFromVoice(text);
+
+    document.getElementById("date").value = date;
+
+    await loadSlots(date);
+
+    if(!time){
+
+        customerSpeak(
+            "Δεν κατάλαβα την ώρα."
+        );
+
+        return;
+    }
+
+    setTimeout(() => {
+
+        const slots =
+            Array.from(
+                document.querySelectorAll(".slot")
+            );
+
+        const wanted =
+            slots.find(
+                s => s.innerText.trim() === time
+            );
+
+        if(wanted){
+
+            selectTime(time, wanted);
+
+            customerSpeak(
+                "Βρήκα διαθέσιμη ώρα στις "
+                + time
+            );
+
+        } else {
+
+            customerSpeak(
+                "Η ώρα δεν είναι διαθέσιμη"
+            );
+
+        }
+
+    },500);
+}
+
+function startCustomerVoice(){
+
+    const SpeechRecognition =
+        window.SpeechRecognition
+        || window.webkitSpeechRecognition;
+
+    if(!SpeechRecognition){
+
+        alert("Δεν υποστηρίζεται.");
+
+        return;
+    }
+
+    const recognition =
+        new SpeechRecognition();
+
+    recognition.lang = "el-GR";
+
+    recognition.interimResults = false;
+
+    recognition.onresult = function(event){
+
+        const text =
+            event.results[0][0].transcript;
+
+        document.getElementById(
+            "customerVoiceText"
+        ).value = text;
+
+        applyVoiceBooking(text);
+    };
+
+    recognition.start();
+}
+
+</script>
     
 </body>
 </html>
