@@ -36,25 +36,44 @@ DATA_FILE = "data.json"
 
 # ---------------- DATA ----------------
 def load():
-    try:
-        with open(DATA_FILE, "r") as f:
-            return json.load(f)
-    except:
-        return []
+
+    cur.execute("""
+        SELECT name, phone, service, time
+        FROM appointments
+    """)
+
+    rows = cur.fetchall()
+
+    data = []
+
+    for row in rows:
+
+        data.append({
+            "name": row[0],
+            "phone": row[1],
+            "service": row[2],
+            "time": row[3]
+        })
+
+    return data
 
 
 def save(data):
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=2)
+    pass
+
 
 BLOCKED_FILE = "blocked.json"
 
 
 def load_blocked():
+
     try:
+
         with open(BLOCKED_FILE, "r") as f:
             return json.load(f)
+
     except:
+
         return {
             "days": [],
             "slots": []
@@ -62,6 +81,7 @@ def load_blocked():
 
 
 def save_blocked(data):
+
     with open(BLOCKED_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
