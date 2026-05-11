@@ -8,6 +8,24 @@ from pywebpush import webpush
 import psycopg2
 import os
 
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+conn = psycopg2.connect(DATABASE_URL)
+
+cur = conn.cursor()
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS appointments (
+    id SERIAL PRIMARY KEY,
+    name TEXT,
+    phone TEXT,
+    service TEXT,
+    time TEXT
+)
+""")
+
+conn.commit()
+
 app = Flask(__name__)
 import os
 
