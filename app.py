@@ -123,6 +123,11 @@ SERVICES = ["Κούρεμα", "Μούσι", "Κούρεμα + Μούσι"]
 @app.route("/", methods=["GET", "POST"])
 def index():
 
+    return render_template(
+        "index.html",
+        services=SERVICES
+    )
+
 # ---------------- HOME ----------------
 @app.route("/", methods=["GET", "POST"])
 def index():
