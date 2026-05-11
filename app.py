@@ -98,7 +98,6 @@ def slots_api():
 
 # ---------------- SLOTS ----------------
 def generate_slots(day):
-
     if day == 6:
         return []
 
@@ -107,20 +106,22 @@ def generate_slots(day):
     if day == 5:
         start = datetime(2000, 1, 1, 10, 0)
         end = datetime(2000, 1, 1, 14, 0)
-
     else:
         start = datetime(2000, 1, 1, 11, 0)
         end = datetime(2000, 1, 1, 20, 0)
 
     while start <= end:
-
-        slots.append(
-            start.strftime("%H:%M")
-        )
-
+        slots.append(start.strftime("%H:%M"))
         start += timedelta(minutes=45)
 
     return slots
+
+
+SERVICES = ["Κούρεμα", "Μούσι", "Κούρεμα + Μούσι"]
+
+
+@app.route("/")
+def index():
 
 # ---------------- HOME ----------------
 @app.route("/", methods=["GET", "POST"])
