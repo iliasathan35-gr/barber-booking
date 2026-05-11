@@ -3,3 +3,4 @@ requests
 gunicorn
 pywebpush
 apscheduler
+psycopg2-binary
