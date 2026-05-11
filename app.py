@@ -60,11 +60,14 @@ def send_telegram(text):
 # ---------------- SLOTS ----------------
 @app.route("/slots")
 def slots_api():
+
     date = request.args.get("date")
+
     data = load()
 
     try:
         dt = datetime.strptime(date, "%Y-%m-%d")
+
     except:
         return jsonify([])
 
@@ -75,27 +78,39 @@ def slots_api():
     slots = generate_slots(dt.weekday())
 
     booked = []
+
     for d in data:
+
         if d["time"].startswith(date):
-            booked.append(d["time"].split(" ")[1])
+
+            booked.append(
+                d["time"].split(" ")[1]
+            )
 
     blocked = load_blocked()
 
+    # ❌ blocked whole day
     if date in blocked["days"]:
         return jsonify([])
 
     blocked_slots = [
-        b["time"] for b in blocked["slots"]
+
+        b["time"]
+
+        for b in blocked["slots"]
+
         if b["date"] == date
     ]
 
     available = [
+
         s for s in slots
-        if s not in booked and s not in blocked_slots
+
+        if s not in booked
+        and s not in blocked_slots
     ]
 
     return jsonify(available)
-
 # ---------------- SLOTS ----------------
 def generate_slots(day):
     if day == 6:
