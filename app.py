@@ -176,7 +176,6 @@ def index():
             except:
                 pass
 
-        # ✅ SAVE
         data.append({
             "name": name,
             "phone": phone,
@@ -191,9 +190,16 @@ def index():
             f"{name} - {service} - {date} {time}"
         )
 
+        send_telegram(
+            f"💈 ΝΕΟ ΡΑΝΤΕΒΟΥ!\n"
+            f"Ονοματεπώνυμο: {name}\n"
+            f"Τηλ: {phone}\n"
+            f"Υπηρεσία: {service}\n"
+            f"Ώρα: {date} {time}"
+        )
+
         return redirect("/success")
 
-    # GET
     today_dt = datetime.now()
 
     today = today_dt.strftime("%Y-%m-%d")
@@ -208,17 +214,6 @@ def index():
         today=today,
         max_date=max_date
     )
-        
-        # 🔔 TELEGRAM NOTIFICATION
-        send_telegram(
-            f"💈 ΝΕΟ ΡΑΝΤΕΒΟΥ!\n"
-            f"Ονοματεπώνυμο: {name}\n"
-            f"Τηλ: {phone}\n"
-            f"Υπηρεσία: {service}\n"
-            f"Ώρα: {date} {time}"
-        )
-
-        return redirect("/success")
 
     # ---------------- GET ----------------
 
