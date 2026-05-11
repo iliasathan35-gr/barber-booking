@@ -656,6 +656,36 @@ async function handleBooking(event){
 }
 
 </script>
+
+<script>
+function customerSpeak(text){
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = "el-GR";
+    window.speechSynthesis.speak(msg);
+}
+
+function startCustomerVoice(){
+    const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if(!SpeechRecognition){
+        alert("Δεν υποστηρίζεται φωνητική αναγνώριση.");
+        return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "el-GR";
+    recognition.interimResults = false;
+
+    recognition.onresult = function(event){
+        const text = event.results[0][0].transcript;
+        document.getElementById("customerVoiceText").value = text;
+        customerSpeak("Άκουσα " + text);
+    };
+
+    recognition.start();
+}
+</script>
     
 </body>
 </html>
