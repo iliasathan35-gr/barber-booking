@@ -19,6 +19,10 @@ import os
 
 app.secret_key = os.environ.get("SECRET_KEY")
 
+from datetime import timedelta
+
+app.permanent_session_lifetime = timedelta(days=180)
+
 DATA_FILE = "data.json"
 
 
