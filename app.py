@@ -848,5 +848,97 @@ def customer_logout():
 
     return redirect("/")
 
+# ---------------- CUSTOMERS ----------------
+@app.route("/admin/customers")
+def admin_customers():
+
+    if not session.get("admin"):
+        return redirect("/login")
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT
+            name,
+            phone,
+            COUNT(*) as visits,
+            MAX(time) as last_visit
+        FROM appointments
+        GROUP BY name, phone
+        ORDER BY last_visit DESC
+    """)
+
+    rows = cur.fetchall()
+
+    customers = []
+
+    for r in rows:
+
+        name = r[0]
+        phone = r[1]
+        visits = r[2]
+        last_visit = r[3]
+
+        # αγαπημένη υπηρεσία
+        cur.execute("""
+            SELECT service, COUNT(*) as c
+            FROM appointments
+            WHERE phone=%s
+            GROUP BY service
+            ORDER BY c DESC
+            LIMIT 1
+        """, (phone,))
+
+        fav = cur.fetchone()
+
+        favorite_service = fav[0] if fav else "-"
+
+        # μέση συχνότητα
+        cur.execute("""
+            SELECT time
+            FROM appointments
+            WHERE phone=%s
+            ORDER BY time ASC
+        """, (phone,))
+
+        dates = [x[0] for x in cur.fetchall()]
+
+        avg_days = "-"
+
+        if len(dates) >= 2:
+
+            diffs = []
+
+            for i in range(1, len(dates)):
+
+                d1 = dates[i-1]
+                d2 = dates[i]
+
+                diffs.append(
+                    (d2 - d1).days
+                )
+
+            avg_days = round(
+                sum(diffs) / len(diffs)
+            )
+
+        customers.append({
+            "name": name,
+            "phone": phone,
+            "visits": visits,
+            "last_visit": last_visit,
+            "favorite_service": favorite_service,
+            "avg_days": avg_days
+        })
+
+    cur.close()
+    conn.close()
+
+    return render_template(
+        "customers.html",
+        customers=customers
+    )
+    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
