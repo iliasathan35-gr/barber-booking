@@ -810,82 +810,50 @@ async function applyVoiceBooking(text){
 
     setTimeout(() => {
 
-        const slots =
-            Array.from(
-                document.querySelectorAll(".slot")
-            );
+    const slots = Array.from(
+        document.querySelectorAll(".slot")
+    );
 
-      let wanted = slots.find(s => {
+    const wanted = slots.find(
+        s => s.innerText.trim() === time
+    );
 
-    const slotTime = s.innerText.trim();
+    if(wanted){
 
-    return slotTime === time;
-});
+        selectTime(
+            wanted.innerText.trim(),
+            wanted
+        );
 
-// αν δεν βρεθεί ακριβώς
-if(!wanted){
+        customerSpeak(
+            "Βρήκα διαθέσιμη ώρα στις " +
+            wanted.innerText.trim()
+        );
 
-    wanted = slots.find(s => {
+        return;
+    }
 
-        const slotHour =
-            parseInt(
-                s.innerText.trim().split(":")[0]
-            );
+    if(slots.length > 0){
 
-        const wantedHour =
-            parseInt(
-                time.split(":")[0]
-            );
+        let availableTimes = slots
+            .slice(0, 3)
+            .map(s => s.innerText.trim())
+            .join(", ");
 
-        return false;
-    });
+        customerSpeak(
+            "Η ώρα " + time +
+            " δεν είναι διαθέσιμη. Κοντινές διαθέσιμες ώρες είναι " +
+            availableTimes
+        );
 
-}
-
-// αν πάλι δεν βρεθεί
-if(!wanted && slots.length > 0){
-
-    let availableTimes = slots
-        .slice(0, 3)
-        .map(s => s.innerText.trim())
-        .join(", ");
+        return;
+    }
 
     customerSpeak(
-        "Η ώρα " + time +
-        " δεν είναι διαθέσιμη. Κοντινές διαθέσιμες ώρες είναι "
-        + availableTimes
+        "Δεν υπάρχουν διαθέσιμες ώρες για αυτή την ημέρα"
     );
 
-    return;
-}
-
-        if(wanted){
-
-    selectTime(
-        wanted.innerText.trim(),
-        wanted
-    );
-
-    customerSpeak(
-        "Βρήκα διαθέσιμη ώρα στις "
-        + wanted.innerText.trim()
-    );
-
-} else {
-
-    let availableTimes = slots
-        .map(s => s.innerText.trim())
-        .slice(0, 3)
-        .join(", ");
-
-    customerSpeak(
-        "Δεν υπάρχει διαθέσιμη ώρα. Οι επόμενες διαθέσιμες είναι " +
-        availableTimes
-    );
-
-}
-
-    },500);
+}, 700);
 }
 
 function startCustomerVoice(){
