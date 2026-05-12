@@ -918,10 +918,25 @@ async function applyVoiceBooking(text){
         document.querySelectorAll(".slot")
     );
 
+
+// Κυριακή
+if(
+    text.includes("κυριακή")
+){
+
+    customerSpeak(
+        "Η κυριακή είναι η μέρα του θεού"
+    );
+
+    return;
+}
+
+
+// Καμία διαθέσιμη ώρα
 if(slotsNow.length === 0){
 
     customerSpeak(
-        "Η ημέρα δεν είναι διαθέσιμη για ραντεβού"
+        "Η συγκεκριμένη ημέρα δεν έχει διαθέσιμα ραντεβού"
     );
 
     return;
