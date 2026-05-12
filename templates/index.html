@@ -984,14 +984,14 @@ if(slotsNow.length === 0){
 
     customerSpeak(
     "Βρήκα διαθέσιμη ώρα στις " +
-    wanted.innerText.trim() +
+     speakTime(wanted.innerText.trim())+
     ". Θέλεις να προχωρήσω στην κράτηση;"
 );
 
 waitingVoiceConfirmation = true;
 
     selectTime(
-        wanted.innerText.trim(),
+        speakTime(wanted.innerText.trim()),
         wanted
     );
 
