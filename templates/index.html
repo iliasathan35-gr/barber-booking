@@ -413,7 +413,7 @@ function selectTime(time, el){
 }
 
 
-function loadSlots(date){
+async function loadSlots(date){
 
     fetch("/slots?date=" + date)
 
