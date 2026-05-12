@@ -339,18 +339,18 @@ def admin():
             full_time = f"{date_str} {s}"
 
             booking = None
-
-           for idx, d in enumerate(data):
-               
-               if d["time"] == full_time:
-                   
-                   booking = d.copy()
-                   
-                   booking["index"] = idx
-                   
-                   booking["id"] = d["id"]
-                   
-                   break 
+            
+            for idx, d in enumerate(data):
+                
+                if d["time"] == full_time:
+                    
+                    booking = d.copy()
+                    
+                    booking["index"] = idx
+                    
+                    booking["id"] = d["id"]
+                    
+                    break
 
             is_blocked = False
 
