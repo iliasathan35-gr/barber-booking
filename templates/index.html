@@ -659,70 +659,37 @@ async function handleBooking(event){
 
 <script>
 function customerSpeak(text){
+    console.log("SPEAK:", text);
 
     window.speechSynthesis.cancel();
 
-    const msg = new SpeechSynthesisUtterance(text);
-
+    const msg = new SpeechSynthesisUtterance();
+    msg.text = text;
     msg.lang = "el-GR";
+    msg.volume = 1;
     msg.rate = 0.95;
+    msg.pitch = 1;
 
-    window.speechSynthesis.speak(msg);
-}
+    window.speechSynthesis.resume();
 
-function startCustomerVoice(){
-    const SpeechRecognition =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if(!SpeechRecognition){
-        alert("Δεν υποστηρίζεται φωνητική αναγνώριση.");
-        return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = "el-GR";
-    recognition.interimResults = false;
-
-    recognition.onresult = function(event){
-        const text = event.results[0][0].transcript;
-        document.getElementById("customerVoiceText").value = text;
-        customerSpeak("Άκουσα " + text);
-    };
-
-    recognition.start();
-}
-</script>
-
-<script>
-
-function customerSpeak(text){
-    const msg = new SpeechSynthesisUtterance(text);
-    msg.lang = "el-GR";
-    window.speechSynthesis.speak(msg);
+    setTimeout(() => {
+        window.speechSynthesis.speak(msg);
+    }, 100);
 }
 
 function setServiceFromVoice(text){
-
-    const service =
-        document.querySelector("select[name='service']");
+    const service = document.querySelector("select[name='service']");
 
     if(text.includes("κούρεμα") && text.includes("μούσι")){
-
         service.value = "Κούρεμα + Μούσι";
-
     } else if(text.includes("μούσι")){
-
         service.value = "Μούσι";
-
     } else if(text.includes("κούρεμα")){
-
         service.value = "Κούρεμα";
-
     }
 }
 
 function getDateFromVoice(text){
-
     const today = new Date();
 
     if(text.includes("αύριο")){
@@ -730,17 +697,13 @@ function getDateFromVoice(text){
     }
 
     const yyyy = today.getFullYear();
-    const mm =
-        String(today.getMonth()+1).padStart(2,"0");
-
-    const dd =
-        String(today.getDate()).padStart(2,"0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
 
     return `${yyyy}-${mm}-${dd}`;
 }
 
 function getTimeFromVoice(text){
-
     text = text
         .replace("μία", "1")
         .replace("μια", "1")
@@ -754,160 +717,101 @@ function getTimeFromVoice(text){
         .replace("οκτώ", "8")
         .replace("εννιά", "9")
         .replace("δέκα", "10");
-    
-    let match =
-        text.match(/(\d{1,2})([:.](\d{2}))?/);
+
+    let match = text.match(/(\d{1,2})([:.](\d{2}))?/);
 
     if(!match){
         return null;
     }
 
     let hour = parseInt(match[1]);
-
-    let minute =
-        match[3] ? match[3] : "00";
+    let minute = match[3] ? match[3] : "00";
 
     if(hour >= 1 && hour <= 9){
+        hour += 12;
+    }
 
-    // barber ώρες = απόγευμα
-    hour += 12;
-
-}
-
-// ειδικά για 12
-if(hour === 12){
-    hour = 12;
-}
-
-console.log("VOICE HOUR:", hour);
-    
-    return String(hour).padStart(2,"0")
-        + ":" + minute;
+    return String(hour).padStart(2, "0") + ":" + minute;
 }
 
 async function applyVoiceBooking(text){
-
     text = text.toLowerCase();
 
     setServiceFromVoice(text);
 
     const date = getDateFromVoice(text);
-
     const time = getTimeFromVoice(text);
 
-    alert("DATE: " + date + " TIME: " + time);
-    
     document.getElementById("date").value = date;
 
-    await loadSlots(date);
+    loadSlots(date);
 
     if(!time){
-
-        customerSpeak(
-            "Δεν κατάλαβα την ώρα."
-        );
-
+        customerSpeak("Δεν κατάλαβα την ώρα.");
         return;
     }
 
     setTimeout(() => {
+        const slots = Array.from(document.querySelectorAll(".slot"));
 
-    const slots = Array.from(
-        document.querySelectorAll(".slot")
-    );
-
-    const wanted = slots.find(
-        s => s.innerText.trim() === time
-    );
-
-    if(wanted){
-
-        selectTime(
-            wanted.innerText.trim(),
-            wanted
+        const wanted = slots.find(
+            s => s.innerText.trim() === time
         );
 
-        customerSpeak(
-            "Βρήκα διαθέσιμη ώρα στις " +
-            wanted.innerText.trim()
-        );
+        if(wanted){
+            selectTime(wanted.innerText.trim(), wanted);
 
-alert(
-    "Βρήκα διαθέσιμη ώρα στις " +
-    wanted.innerText.trim()
-);
-        
-        return;
-    }
+            customerSpeak(
+                "Βρήκα διαθέσιμη ώρα στις " +
+                wanted.innerText.trim()
+            );
 
-    if(slots.length > 0){
+            return;
+        }
 
-        let availableTimes = slots
-            .slice(0, 3)
-            .map(s => s.innerText.trim())
-            .join(", ");
+        if(slots.length > 0){
+            let availableTimes = slots
+                .slice(0, 3)
+                .map(s => s.innerText.trim())
+                .join(", ");
 
-        customerSpeak(
-            "Η ώρα " + time +
-            " δεν είναι διαθέσιμη. Κοντινές διαθέσιμες ώρες είναι " +
-            availableTimes
-        );
+            customerSpeak(
+                "Η ώρα " + time +
+                " δεν είναι διαθέσιμη. Κοντινές διαθέσιμες ώρες είναι " +
+                availableTimes
+            );
 
-        alert(
-    "Η ώρα " + time +
-    " δεν είναι διαθέσιμη. Κοντινές διαθέσιμες ώρες είναι " +
-    availableTimes
-);
-        
-        return;
-    }
+            return;
+        }
 
-    customerSpeak(
-        "Δεν υπάρχουν διαθέσιμες ώρες για αυτή την ημέρα"
-    );
-
-}, 700);
+        customerSpeak("Δεν υπάρχουν διαθέσιμες ώρες για αυτή την ημέρα.");
+    }, 900);
 }
 
 function startCustomerVoice(){
-
     const SpeechRecognition =
-        window.SpeechRecognition
-        || window.webkitSpeechRecognition;
+        window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if(!SpeechRecognition){
-
-        alert("Δεν υποστηρίζεται.");
-
+        alert("Δεν υποστηρίζεται φωνητική αναγνώριση.");
         return;
     }
 
-    const recognition =
-        new SpeechRecognition();
+    const recognition = new SpeechRecognition();
 
     recognition.lang = "el-GR";
-
     recognition.interimResults = false;
 
     recognition.onresult = function(event){
+        const text = event.results[0][0].transcript;
 
-        const text =
-            event.results[0][0].transcript;
+        document.getElementById("customerVoiceText").value = text;
 
-        document.getElementById(
-            "customerVoiceText"
-        ).value = text;
-
-        alert(text);
-        
-        console.log(text);
-        
         applyVoiceBooking(text);
     };
 
     recognition.start();
 }
-
 </script>
     
 </body>
