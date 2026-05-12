@@ -941,13 +941,51 @@ function startCustomerVoice(){
     recognition.onresult = function(event){
 
         const text =
-            event.results[0][0].transcript;
+    event.results[0][0].transcript
+    .toLowerCase();
 
-        document.getElementById(
-            "customerVoiceText"
-        ).value = text;
+document.getElementById(
+    "customerVoiceText"
+).value = text;
 
-        applyVoiceBooking(text);
+
+if(waitingVoiceConfirmation){
+
+    if(
+        text.includes("ναι")
+        || text.includes("κλείσε")
+        || text.includes("προχώρα")
+    ){
+
+        customerSpeak(
+            "Η κράτηση ολοκληρώθηκε"
+        );
+
+        waitingVoiceConfirmation = false;
+
+        document.querySelector("form").submit();
+
+        return;
+    }
+
+    if(
+        text.includes("όχι")
+        || text.includes("άκυρο")
+    ){
+
+        customerSpeak(
+            "Η κράτηση ακυρώθηκε"
+        );
+
+        waitingVoiceConfirmation = false;
+
+        return;
+    }
+
+}
+
+
+applyVoiceBooking(text);
     };
 
     recognition.onerror = function(e){
