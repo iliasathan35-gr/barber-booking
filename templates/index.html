@@ -976,6 +976,40 @@ if(slotsNow.length === 0){
 
             return s.innerText.trim() === time;
 
+            if(!wanted && slots.length > 0){
+
+    const wantedMinutes =
+        parseInt(time.split(":")[0]) * 60
+        + parseInt(time.split(":")[1]);
+
+    let closest = slots
+        .map(s => {
+
+            const t = s.innerText.trim();
+
+            const mins =
+                parseInt(t.split(":")[0]) * 60
+                + parseInt(t.split(":")[1]);
+
+            return {
+                time: t,
+                diff: Math.abs(mins - wantedMinutes)
+            };
+
+        })
+        .sort((a,b) => a.diff - b.diff)
+        .slice(0,3)
+        .map(x => speakTime(x.time))
+        .join(", ");
+
+    customerSpeak(
+        "Η ώρα " + speakTime(time) +
+        " δεν είναι διαθέσιμη. Οι 3 κοντινότερες διαθέσιμες ώρες είναι " +
+        closest
+    );
+
+    return;
+}
         });
 
         if(wanted){
