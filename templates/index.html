@@ -694,50 +694,30 @@ localStorage.setItem(
 </script>
 
 <script>
+let waitingVoiceConfirmation = false;
+let recognition = null;
 
-    let waitingVoiceConfirmation = false;
-    
-    function customerSpeak(text){
-
+function customerSpeak(text){
     window.speechSynthesis.cancel();
-        
-    const msg = new SpeechSynthesisUtterance(text);
 
+    const msg = new SpeechSynthesisUtterance(text);
     msg.lang = "el-GR";
     msg.rate = 0.95;
 
     window.speechSynthesis.resume();
 
-customerSpeak(
-    "Η ώρα " + speakTime(time) +
-    " δεν είναι διαθέσιμη. Οι 3 κοντινότερες διαθέσιμες ώρες είναι " +
-    closest
-);
-
-customerSpeak(
-    "Η ώρα " + speakTime(time) +
-    " δεν είναι διαθέσιμη. Οι 3 κοντινότερες διαθέσιμες ώρες είναι " +
-    closest
-);
-
     setTimeout(() => {
         window.speechSynthesis.speak(msg);
     }, 100);
-
 }
 
-
 function speakTime(t){
-
     let parts = t.split(":");
-
-    let hour =
-        parseInt(parts[0]);
-
+    let hour = parseInt(parts[0]);
     let minute = parts[1];
 
     if(hour > 12){
-        hour = hour - 12;
+        hour -= 12;
     }
 
     if(minute === "00"){
@@ -747,131 +727,95 @@ function speakTime(t){
     return hour + ":" + minute;
 }
 
-
 function setServiceFromVoice(text){
-
-    const service =
-        document.querySelector("select[name='service']");
+    const service = document.querySelector("select[name='service']");
 
     if(text.includes("κούρεμα") && text.includes("μούσι")){
-
         service.value = "Κούρεμα + Μούσι";
-
     } else if(text.includes("μούσι")){
-
         service.value = "Μούσι";
-
     } else if(text.includes("κούρεμα")){
-
         service.value = "Κούρεμα";
-
     }
 }
 
-
 function getDateFromVoice(text){
-
     text = text.toLowerCase();
 
     const today = new Date();
 
-    // σήμερα
-    if(text.includes("σήμερα")){
-        // μένει σήμερα
-    }
-
-    // αύριο
-    else if(text.includes("αύριο")){
+    if(text.includes("αύριο")){
         today.setDate(today.getDate() + 1);
-    }
-
-    // μεθαύριο
-    else if(text.includes("μεθαύριο")){
+    } else if(text.includes("μεθαύριο")){
         today.setDate(today.getDate() + 2);
-    }
-
-    // ημερομηνίες τύπου 15/5 ή 15-5
-    else {
+    } else {
         const greekMonths = {
-    "ιανουαρίου": 0,
-    "φεβρουαρίου": 1,
-    "μαρτίου": 2,
-    "απριλίου": 3,
-    "μαΐου": 4,
-    "μαιου": 4,
-    "ιουνίου": 5,
-    "ιουλίου": 6,
-    "αυγούστου": 7,
-    "αυγουστου": 7,
-    "σεπτεμβρίου": 8,
-    "οκτωβρίου": 9,
-    "νοεμβρίου": 10,
-    "δεκεμβρίου": 11
-};
+            "ιανουαρίου": 0,
+            "φεβρουαρίου": 1,
+            "μαρτίου": 2,
+            "απριλίου": 3,
+            "μαΐου": 4,
+            "μαιου": 4,
+            "ιουνίου": 5,
+            "ιουλίου": 6,
+            "αυγούστου": 7,
+            "αυγουστου": 7,
+            "σεπτεμβρίου": 8,
+            "οκτωβρίου": 9,
+            "νοεμβρίου": 10,
+            "δεκεμβρίου": 11
+        };
 
-for(const monthName in greekMonths){
+        let foundMonth = false;
 
-    if(text.includes(monthName)){
+        for(const monthName in greekMonths){
+            if(text.includes(monthName)){
+                const dayMatch = text.match(/(\d{1,2})/);
 
-        const dayMatch = text.match(/(\d{1,2})/);
+                if(dayMatch){
+                    today.setFullYear(
+                        today.getFullYear(),
+                        greekMonths[monthName],
+                        parseInt(dayMatch[1])
+                    );
 
-        if(dayMatch){
-
-            const day =
-                parseInt(dayMatch[1]);
-
-            const year =
-                today.getFullYear();
-
-            today.setFullYear(
-                year,
-                greekMonths[monthName],
-                day
-            );
-
-            break;
-        }
-    }
-}
-        
-        const dateMatch = text.match(/(\d{1,2})[\/\-\.](\d{1,2})/);
-
-        if(dateMatch){
-            const day = parseInt(dateMatch[1]);
-            const month = parseInt(dateMatch[2]) - 1;
-            const year = today.getFullYear();
-
-            today.setFullYear(year, month, day);
-        }
-
-        // μέρες ονομαστικά
-        else {
-            const days = {
-                "κυριακή": 0,
-                "δευτέρα": 1,
-                "τρίτη": 2,
-                "τετάρτη": 3,
-                "πέμπτη": 4,
-                "παρασκευή": 5,
-                "σάββατο": 6
-            };
-
-            for(const word in days){
-
-                if(text.includes(word)){
-
-                    let targetDay = days[word];
-
-                    let diff =
-                        (targetDay - today.getDay() + 7) % 7;
-
-                    if(diff === 0){
-                        diff = 7;
-                    }
-
-                    today.setDate(today.getDate() + diff);
-
+                    foundMonth = true;
                     break;
+                }
+            }
+        }
+
+        if(!foundMonth){
+            const dateMatch = text.match(/(\d{1,2})[\/\-\.](\d{1,2})/);
+
+            if(dateMatch){
+                today.setFullYear(
+                    today.getFullYear(),
+                    parseInt(dateMatch[2]) - 1,
+                    parseInt(dateMatch[1])
+                );
+            } else {
+                const days = {
+                    "κυριακή": 0,
+                    "δευτέρα": 1,
+                    "τρίτη": 2,
+                    "τετάρτη": 3,
+                    "πέμπτη": 4,
+                    "παρασκευή": 5,
+                    "σάββατο": 6
+                };
+
+                for(const word in days){
+                    if(text.includes(word)){
+                        let diff = (days[word] - today.getDay() + 7) % 7;
+
+                        if(diff === 0){
+                            diff = 7;
+                        }
+
+                        today.setDate(today.getDate() + diff);
+                        break;
+                    }
                 }
             }
         }
@@ -884,16 +828,13 @@ for(const monthName in greekMonths){
     return `${yyyy}-${mm}-${dd}`;
 }
 
-
 function getTimeFromVoice(text){
-
     text = text.toLowerCase();
 
     text = text
         .replace("μία", "1")
         .replace("μια", "1")
         .replace("δύο", "2")
-        .replace("τρία", "3")
         .replace("τρία", "3")
         .replace("τέσσερα", "4")
         .replace("πέντε", "5")
@@ -904,287 +845,162 @@ function getTimeFromVoice(text){
         .replace("εννιά", "9")
         .replace("δέκα", "10");
 
-    let match =
-        text.match(/(\d{1,2})([:.](\d{2}))?/);
+    const match = text.match(/(\d{1,2})([:.](\d{2}))?/);
 
     if(!match){
         return null;
     }
 
     let hour = parseInt(match[1]);
-
-    let minute =
-        match[3] ? match[3] : "00";
+    let minute = match[3] ? match[3] : "00";
 
     if(hour >= 1 && hour <= 9){
         hour += 12;
     }
 
-    return String(hour).padStart(2,"0")
-        + ":" + minute;
+    return String(hour).padStart(2, "0") + ":" + minute;
 }
 
+function closestTimes(slots, wantedTime){
+    const wantedMinutes =
+        parseInt(wantedTime.split(":")[0]) * 60 +
+        parseInt(wantedTime.split(":")[1]);
+
+    return slots
+        .map(s => {
+            const t = s.innerText.trim();
+
+            const mins =
+                parseInt(t.split(":")[0]) * 60 +
+                parseInt(t.split(":")[1]);
+
+            return {
+                time: t,
+                diff: Math.abs(mins - wantedMinutes)
+            };
+        })
+        .sort((a, b) => a.diff - b.diff)
+        .slice(0, 3)
+        .map(x => speakTime(x.time))
+        .join(", ");
+}
 
 async function applyVoiceBooking(text){
-
     text = text.toLowerCase();
 
     setServiceFromVoice(text);
 
     const date = getDateFromVoice(text);
-
     const time = getTimeFromVoice(text);
 
     if(!time){
-
-        customerSpeak(
-            "Δεν κατάλαβα την ώρα"
-        );
-
+        customerSpeak("Δεν κατάλαβα την ώρα.");
         return;
     }
 
     document.getElementById("date").value = date;
 
-    await loadSlots(date);
+    loadSlots(date);
 
-    const slotsNow =
-    Array.from(
-        document.querySelectorAll(".slot")
-    );
-
-
-// Κυριακή
-if(
-    text.includes("κυριακή")
-){
-
-    customerSpeak(
-        "Η κυριακή είναι η μέρα του θεού"
-    );
-
-    return;
-}
-
-
-// Καμία διαθέσιμη ώρα
-if(slotsNow.length === 0){
-
-    customerSpeak(
-        "Η συγκεκριμένη ημέρα δεν έχει διαθέσιμα ραντεβού"
-    );
-
-    return;
-}
-    
     setTimeout(() => {
+        const slots = Array.from(document.querySelectorAll(".slot"));
 
-        const slots =
-            Array.from(
-                document.querySelectorAll(".slot")
-            );
+        if(text.includes("κυριακή")){
+            customerSpeak("Την Κυριακή είμαστε κλειστά.");
+            return;
+        }
 
-        let wanted = slots.find(s => {
+        if(slots.length === 0){
+            customerSpeak("Η συγκεκριμένη ημέρα δεν έχει διαθέσιμα ραντεβού.");
+            return;
+        }
 
-            return s.innerText.trim() === time;
-
-            if(!wanted && slots.length > 0){
-
-    const wantedMinutes =
-        parseInt(time.split(":")[0]) * 60
-        + parseInt(time.split(":")[1]);
-
-    let closest = slots
-        .map(s => {
-
-            const t = s.innerText.trim();
-
-            const mins =
-                parseInt(t.split(":")[0]) * 60
-                + parseInt(t.split(":")[1]);
-
-            return {
-                time: t,
-                diff: Math.abs(mins - wantedMinutes)
-            };
-
-        })
-        .sort((a,b) => a.diff - b.diff)
-        .slice(0,3)
-        .map(x => speakTime(x.time))
-        .join(", ");
-
-    customerSpeak(
-        "Η ώρα " + speakTime(time) +
-        " δεν είναι διαθέσιμη. Οι 3 κοντινότερες διαθέσιμες ώρες είναι " +
-        closest
-    );
-
-    return;
-}
-        });
+        const wanted = slots.find(
+            s => s.innerText.trim() === time
+        );
 
         if(wanted){
+            selectTime(wanted.innerText.trim(), wanted);
 
-    customerSpeak(
-    "Βρήκα διαθέσιμη ώρα στις " +
-     speakTime(wanted.innerText.trim())+
-    ". Θέλεις να προχωρήσω στην κράτηση;"
-);
+            customerSpeak(
+                "Βρήκα διαθέσιμη ώρα στις " +
+                speakTime(wanted.innerText.trim()) +
+                ". Θέλεις να προχωρήσω στην κράτηση;"
+            );
 
-waitingVoiceConfirmation = true;
+            waitingVoiceConfirmation = true;
+            return;
+        }
 
-    selectTime(
-        speakTime(wanted.innerText.trim()),
-        wanted
-    );
-
-    return;
-}
-
-        if(slots.length > 0){
-
-    const wantedMinutes =
-        parseInt(time.split(":")[0]) * 60
-        + parseInt(time.split(":")[1]);
-
-    let closest = slots
-        .map(s => {
-
-            const t = s.innerText.trim();
-
-            const mins =
-                parseInt(t.split(":")[0]) * 60
-                + parseInt(t.split(":")[1]);
-
-            return {
-                time: t,
-                diff: Math.abs(mins - wantedMinutes)
-            };
-
-        })
-
-        .sort((a,b) => a.diff - b.diff)
-
-        .slice(0,3)
-
-        .map(s => speakTime(s.innerText.trim()))
-
-        .join(", ");
-
-    customerSpeak(
-        "Η ώρα " + time +
-        " δεν είναι διαθέσιμη. " +
-        "Οι κοντινότερες διαθέσιμες ώρες είναι " +
-        closest
-    );
-
-    return;
-}
+        const closest = closestTimes(slots, time);
 
         customerSpeak(
-            "Δεν υπάρχουν διαθέσιμες ώρες"
+            "Η ώρα " + speakTime(time) +
+            " δεν είναι διαθέσιμη. Οι 3 κοντινότερες διαθέσιμες ώρες είναι " +
+            closest
         );
 
-    }, 800);
-
+    }, 900);
 }
 
-
 function startCustomerVoice(){
-
-    waitingVoiceConfirmation = false;
-    
     customerSpeak("Σε ακούω");
-    
+
     const SpeechRecognition =
-        window.SpeechRecognition
-        || window.webkitSpeechRecognition;
+        window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if(!SpeechRecognition){
-
-        alert(
-            "Δεν υποστηρίζεται voice recognition"
-        );
-
+        alert("Δεν υποστηρίζεται voice recognition");
         return;
     }
 
-    const recognition =
-        new SpeechRecognition();
-
+    recognition = new SpeechRecognition();
     recognition.lang = "el-GR";
-
     recognition.interimResults = false;
-
     recognition.maxAlternatives = 1;
 
     recognition.onresult = function(event){
+        const text = event.results[0][0].transcript.toLowerCase();
 
-        recognition.stop();
-        
-        const text =
-    event.results[0][0].transcript
-    .toLowerCase();
+        document.getElementById("customerVoiceText").value = text;
 
-document.getElementById(
-    "customerVoiceText"
-).value = text;
+        if(waitingVoiceConfirmation){
+            if(
+                text.includes("ναι") ||
+                text.includes("κλείσε") ||
+                text.includes("προχώρα")
+            ){
+                customerSpeak("Η κράτηση ολοκληρώθηκε.");
 
+                waitingVoiceConfirmation = false;
 
-if(waitingVoiceConfirmation){
+                setTimeout(() => {
+                    document.querySelector("form").submit();
+                }, 800);
 
-    if(
-        text.includes("ναι")
-        || text.includes("κλείσε")
-        || text.includes("προχώρα")
-    ){
+                return;
+            }
 
-        customerSpeak(
-            "Η κράτηση ολοκληρώθηκε"
-        );
+            if(
+                text.includes("όχι") ||
+                text.includes("άκυρο")
+            ){
+                customerSpeak("Η κράτηση ακυρώθηκε.");
+                waitingVoiceConfirmation = false;
+                return;
+            }
+        }
 
-        waitingVoiceConfirmation = false;
-
-        document.querySelector("form").submit();
-
-        return;
-    }
-
-    if(
-        text.includes("όχι")
-        || text.includes("άκυρο")
-    ){
-
-        customerSpeak(
-            "Η κράτηση ακυρώθηκε"
-        );
-
-        waitingVoiceConfirmation = false;
-
-        return;
-    }
-
-}
-
-
-applyVoiceBooking(text);
+        applyVoiceBooking(text);
     };
 
     recognition.onerror = function(e){
-
         console.log(e);
-
-        customerSpeak(
-            "Υπήρξε πρόβλημα με το μικρόφωνο"
-        );
+        customerSpeak("Υπήρξε πρόβλημα με το μικρόφωνο.");
     };
 
-    window.speechSynthesis.resume();
-    
     recognition.start();
 }
-
 </script>
     
 </body>
