@@ -841,6 +841,17 @@ if(!wanted && slots.length > 0){
 
     wanted = slots[0];
 
+    selectTime(
+        wanted.innerText.trim(),
+        wanted
+    );
+
+    customerSpeak(
+        "Η ώρα δεν είναι διαθέσιμη. Σου έβαλα την κοντινότερη διαθέσιμη ώρα στις "
+        + wanted.innerText.trim()
+    );
+
+    return;
 }
 
         if(wanted){
