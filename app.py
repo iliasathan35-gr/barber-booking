@@ -1085,5 +1085,37 @@ def admin_customer_profile(phone):
         notes=notes
     )
 
+# ---------------- ADD CUSTOMER NOTE ----------------
+@app.route("/admin/add-note", methods=["POST"])
+def admin_add_note():
+
+    if not session.get("admin"):
+        return redirect("/login")
+
+    phone = request.form.get("phone")
+    note = request.form.get("note")
+
+    if not phone or not note:
+        return redirect("/admin/customers")
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        INSERT INTO customer_notes
+        (customer_phone, note)
+        VALUES (%s,%s)
+    """, (
+        phone,
+        note
+    ))
+
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+    return redirect(f"/admin/customer/{phone}")
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
