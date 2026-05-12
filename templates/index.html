@@ -699,6 +699,8 @@ localStorage.setItem(
     
     function customerSpeak(text){
 
+    window.speechSynthesis.cancel();
+        
     const msg = new SpeechSynthesisUtterance(text);
 
     msg.lang = "el-GR";
