@@ -736,21 +736,73 @@ function setServiceFromVoice(text){
 
 function getDateFromVoice(text){
 
+    text = text.toLowerCase();
+
     const today = new Date();
 
-    if(text.includes("αύριο")){
+    // σήμερα
+    if(text.includes("σήμερα")){
+        // μένει σήμερα
+    }
+
+    // αύριο
+    else if(text.includes("αύριο")){
         today.setDate(today.getDate() + 1);
     }
 
+    // μεθαύριο
+    else if(text.includes("μεθαύριο")){
+        today.setDate(today.getDate() + 2);
+    }
+
+    // ημερομηνίες τύπου 15/5 ή 15-5
+    else {
+        const dateMatch = text.match(/(\d{1,2})[\/\-\.](\d{1,2})/);
+
+        if(dateMatch){
+            const day = parseInt(dateMatch[1]);
+            const month = parseInt(dateMatch[2]) - 1;
+            const year = today.getFullYear();
+
+            today.setFullYear(year, month, day);
+        }
+
+        // μέρες ονομαστικά
+        else {
+            const days = {
+                "κυριακή": 0,
+                "δευτέρα": 1,
+                "τρίτη": 2,
+                "τετάρτη": 3,
+                "πέμπτη": 4,
+                "παρασκευή": 5,
+                "σάββατο": 6
+            };
+
+            for(const word in days){
+
+                if(text.includes(word)){
+
+                    let targetDay = days[word];
+
+                    let diff =
+                        (targetDay - today.getDay() + 7) % 7;
+
+                    if(diff === 0){
+                        diff = 7;
+                    }
+
+                    today.setDate(today.getDate() + diff);
+
+                    break;
+                }
+            }
+        }
+    }
+
     const yyyy = today.getFullYear();
-
-    const mm =
-        String(today.getMonth()+1)
-        .padStart(2,"0");
-
-    const dd =
-        String(today.getDate())
-        .padStart(2,"0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
 
     return `${yyyy}-${mm}-${dd}`;
 }
