@@ -1024,7 +1024,7 @@ waitingVoiceConfirmation = true;
 
         .slice(0,3)
 
-        .map(x => x.time)
+        .map(s => speakTime(s.innerText.trim()))
 
         .join(", ");
 
