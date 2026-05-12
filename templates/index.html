@@ -708,6 +708,18 @@ localStorage.setItem(
 
     window.speechSynthesis.resume();
 
+customerSpeak(
+    "Η ώρα " + speakTime(time) +
+    " δεν είναι διαθέσιμη. Οι 3 κοντινότερες διαθέσιμες ώρες είναι " +
+    closest
+);
+
+customerSpeak(
+    "Η ώρα " + speakTime(time) +
+    " δεν είναι διαθέσιμη. Οι 3 κοντινότερες διαθέσιμες ώρες είναι " +
+    closest
+);
+
     setTimeout(() => {
         window.speechSynthesis.speak(msg);
     }, 100);
