@@ -718,5 +718,113 @@ def unblock_slot(date, time):
 
     return redirect("/admin")
 
+# ---------------- CUSTOMER REGISTER ----------------
+@app.route("/customer/register", methods=["GET", "POST"])
+def customer_register():
+
+    if request.method == "POST":
+
+        name = request.form.get("name")
+        phone = request.form.get("phone")
+        password = request.form.get("password")
+
+        if not name or not phone or not password:
+            return "❌ Συμπλήρωσε όλα τα πεδία"
+
+        conn = get_db()
+        cur = conn.cursor()
+
+        cur.execute(
+            "SELECT id FROM customers WHERE phone=%s",
+            (phone,)
+        )
+
+        exists = cur.fetchone()
+
+        if exists:
+
+            cur.close()
+            conn.close()
+
+            return "❌ Υπάρχει ήδη λογαριασμός"
+
+        cur.execute("""
+            INSERT INTO customers
+            (name, phone, password)
+            VALUES (%s,%s,%s)
+            RETURNING id
+        """, (
+            name,
+            phone,
+            password
+        ))
+
+        customer_id = cur.fetchone()[0]
+
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+        session.permanent = True
+
+        session["customer_id"] = customer_id
+        session["customer_name"] = name
+        session["customer_phone"] = phone
+
+        return redirect("/")
+
+    return render_template("customer_register.html")
+
+
+# ---------------- CUSTOMER LOGIN ----------------
+@app.route("/customer/login", methods=["GET", "POST"])
+def customer_login():
+
+    if request.method == "POST":
+
+        phone = request.form.get("phone")
+        password = request.form.get("password")
+
+        conn = get_db()
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT id, name, phone
+            FROM customers
+            WHERE phone=%s
+            AND password=%s
+        """, (
+            phone,
+            password
+        ))
+
+        user = cur.fetchone()
+
+        cur.close()
+        conn.close()
+
+        if not user:
+            return "❌ Λάθος στοιχεία"
+
+        session.permanent = True
+
+        session["customer_id"] = user[0]
+        session["customer_name"] = user[1]
+        session["customer_phone"] = user[2]
+
+        return redirect("/")
+
+    return render_template("customer_login.html")
+
+
+# ---------------- CUSTOMER LOGOUT ----------------
+@app.route("/customer/logout")
+def customer_logout():
+
+    session.clear()
+
+    return redirect("/")
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
