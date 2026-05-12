@@ -1049,6 +1049,8 @@ waitingVoiceConfirmation = true;
 
 function startCustomerVoice(){
 
+    waitingVoiceConfirmation = false;
+    
     customerSpeak("Σε ακούω");
     
     const SpeechRecognition =
