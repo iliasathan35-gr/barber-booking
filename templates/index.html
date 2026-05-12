@@ -839,16 +839,15 @@ if(!wanted){
 // αν πάλι δεν βρεθεί
 if(!wanted && slots.length > 0){
 
-    wanted = slots[0];
-
-    selectTime(
-        wanted.innerText.trim(),
-        wanted
-    );
+    let availableTimes = slots
+        .slice(0, 3)
+        .map(s => s.innerText.trim())
+        .join(", ");
 
     customerSpeak(
-        "Η ώρα δεν είναι διαθέσιμη. Σου έβαλα την κοντινότερη διαθέσιμη ώρα στις "
-        + wanted.innerText.trim()
+        "Η ώρα " + time +
+        " δεν είναι διαθέσιμη. Κοντινές διαθέσιμες ώρες είναι "
+        + availableTimes
     );
 
     return;
