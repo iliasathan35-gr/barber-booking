@@ -286,6 +286,51 @@ select:focus{
             <div>
                 <h1>Polutelias</h1>
                 <p>Premium Barber Experience</p>
+                {% if session.get("customer_id") %}
+
+<p style="margin-top:6px;">
+    👤 {{ session.get("customer_name") }}
+</p>
+
+<a
+    href="/customer/logout"
+    style="
+        color:#00e676;
+        text-decoration:none;
+        font-size:14px;
+    "
+>
+    Logout
+</a>
+
+{% else %}
+
+<div style="margin-top:10px;">
+
+    <a
+        href="/customer/login"
+        style="
+            color:#00e676;
+            text-decoration:none;
+            margin-right:10px;
+        "
+    >
+        Login
+    </a>
+
+    <a
+        href="/customer/register"
+        style="
+            color:#00e676;
+            text-decoration:none;
+        "
+    >
+        Register
+    </a>
+
+</div>
+
+{% endif %}
             </div>
         </div>
 
