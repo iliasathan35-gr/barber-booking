@@ -695,6 +695,8 @@ localStorage.setItem(
 
 <script>
 
+    let waitingVoiceConfirmation = false;
+    
     function customerSpeak(text){
 
     const msg = new SpeechSynthesisUtterance(text);
