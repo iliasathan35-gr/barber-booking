@@ -45,6 +45,7 @@ def load():
 
     for row in rows:
         data.append({
+            "id": row[0],
             "name": row[0],
             "phone": row[1],
             "service": row[2],
