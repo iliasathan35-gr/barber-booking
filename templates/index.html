@@ -1121,6 +1121,8 @@ function startCustomerVoice(){
 
     recognition.onresult = function(event){
 
+        recognition.stop();
+        
         const text =
     event.results[0][0].transcript
     .toLowerCase();
