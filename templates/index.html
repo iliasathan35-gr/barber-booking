@@ -960,9 +960,12 @@ if(slotsNow.length === 0){
     alert("MILAWWWWW");
 
     customerSpeak(
-        "Βρήκα διαθέσιμη ώρα στις " +
-        wanted.innerText.trim()
-    );
+    "Βρήκα διαθέσιμη ώρα στις " +
+    wanted.innerText.trim() +
+    ". Θέλεις να προχωρήσω στην κράτηση;"
+);
+
+waitingVoiceConfirmation = true;
 
     selectTime(
         wanted.innerText.trim(),
