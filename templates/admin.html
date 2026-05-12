@@ -567,6 +567,43 @@ class="book-btn"
 </div>
 
 {% endif %}
+
+    {% if request.args.get("enable_notifications") %}
+
+<div id="adminNotifBox"
+style="
+position:fixed;
+left:20px;
+right:20px;
+bottom:40px;
+background:#171717;
+padding:20px;
+border-radius:24px;
+z-index:9999;
+box-shadow:0 10px 30px rgba(0,0,0,0.4);
+">
+
+<h3 style="margin-bottom:10px;">
+🔔 Admin ειδοποιήσεις
+</h3>
+
+<p style="color:#aaa;margin-bottom:14px;">
+Θέλεις να λαμβάνεις ειδοποιήσεις όταν κλείνεται νέο ραντεβού;
+</p>
+
+<button
+onclick="
+enableAdminNotifications();
+document.getElementById('adminNotifBox').remove();
+"
+class="btn add-btn"
+>
+Ενεργοποίηση
+</button>
+
+</div>
+
+{% endif %}
     
 </body>
 </html>
