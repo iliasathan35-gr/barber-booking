@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Πελάτες</title>
+
+<style>
+
+body{
+    background:#0f0f0f;
+    color:white;
+    font-family:Arial;
+    margin:0;
+    padding:20px;
+}
+
+h1{
+    margin-bottom:25px;
+}
+
+.card{
+    background:#171717;
+    border-radius:22px;
+    padding:20px;
+    margin-bottom:16px;
+}
+
+.name{
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:8px;
+}
+
+.info{
+    color:#bdbdbd;
+    margin-bottom:6px;
+}
+
+.back-btn{
+    display:inline-block;
+    margin-bottom:20px;
+    color:#00e676;
+    text-decoration:none;
+    font-size:18px;
+}
+
+</style>
+</head>
+<body>
+
+<a href="/admin" class="back-btn">
+← Admin
+</a>
+
+<h1>👥 Πελάτες</h1>
+
+{% for c in customers %}
+
+<div class="card">
+
+<div class="name">
+{{ c.name }}
+</div>
+
+<div class="info">
+📞 {{ c.phone }}
+</div>
+
+<div class="info">
+💈 Σύνολο ραντεβού:
+{{ c.visits }}
+</div>
+
+<div class="info">
+⭐ Αγαπημένη υπηρεσία:
+{{ c.favorite_service }}
+</div>
+
+<div class="info">
+📅 Τελευταίο ραντεβού:
+{{ c.last_visit }}
+</div>
+
+<div class="info">
+⏱️ Κουρεύεται περίπου κάθε
+{{ c.avg_days }}
+μέρες
+</div>
+
+</div>
+
+{% endfor %}
+
+</body>
+</html>
