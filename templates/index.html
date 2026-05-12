@@ -817,6 +817,20 @@ async function applyVoiceBooking(text){
 
     await loadSlots(date);
 
+    const slotsNow =
+    Array.from(
+        document.querySelectorAll(".slot")
+    );
+
+if(slotsNow.length === 0){
+
+    customerSpeak(
+        "Η ημέρα δεν είναι διαθέσιμη για ραντεβού"
+    );
+
+    return;
+}
+    
     setTimeout(() => {
 
         const slots =
