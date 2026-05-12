@@ -175,6 +175,9 @@ SERVICES = ["Κούρεμα", "Μούσι", "Κούρεμα + Μούσι"]
 # ---------------- HOME ----------------
 @app.route("/", methods=["GET", "POST"])
 def index():
+    customer_name = session.get("customer_name")
+    customer_phone = session.get("customer_phone")
+    
     data = load()
 
     if request.method == "POST":
@@ -249,11 +252,13 @@ def index():
     max_date = (today_dt + timedelta(days=7)).strftime("%Y-%m-%d")
 
     return render_template(
-        "index.html",
-        services=SERVICES,
-        today=today,
-        max_date=max_date
-    )
+    "index.html",
+    services=SERVICES,
+    today=today,
+    max_date=max_date,
+    customer_name=customer_name,
+    customer_phone=customer_phone
+)
 
     # ---------------- GET ----------------
 
