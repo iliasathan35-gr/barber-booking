@@ -1296,6 +1296,94 @@ def toggle_ban():
     conn.close()
 
     return redirect(f"/admin/customer/{phone}")
-    
+
+# ---------------- UPDATE DELAY ----------------
+@app.route("/admin/delay/<int:minutes>")
+def admin_delay(minutes):
+
+    if not session.get("admin"):
+        return "Unauthorized"
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        UPDATE live_queue
+        SET delay_minutes=%s,
+            updated_at=NOW()
+        WHERE id=1
+    """, (minutes,))
+
+    conn.commit()
+
+    # επόμενος πελάτης
+    now = datetime.now()
+
+    cur.execute("""
+        SELECT name, phone, time
+        FROM appointments
+        ORDER BY time ASC
+    """)
+
+    rows = cur.fetchall()
+
+    next_customer = None
+
+    for r in rows:
+
+        try:
+
+            appt = datetime.strptime(
+                r[2],
+                "%Y-%m-%d %H:%M"
+            )
+
+            if appt > now:
+
+                next_customer = r
+
+                break
+
+        except:
+            pass
+
+    if next_customer:
+
+        send_push_to_customer(
+            next_customer[1],
+            "⏳ Καθυστέρηση",
+            f"Υπάρχει περίπου {minutes} λεπτά καθυστέρηση στο ραντεβού σου."
+        )
+
+    cur.close()
+    conn.close()
+
+    return "OK"
+
+
+
+# ---------------- RESET DELAY ----------------
+@app.route("/admin/reset-delay")
+def admin_reset_delay():
+
+    if not session.get("admin"):
+        return "Unauthorized"
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        UPDATE live_queue
+        SET delay_minutes=0
+        WHERE id=1
+    """)
+
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+    return "OK"
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
