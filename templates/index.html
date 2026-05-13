@@ -776,6 +776,10 @@ localStorage.setItem(
 
 <script>
 let waitingVoiceConfirmation = false;
+    
+let waitingWaitlistConfirmation = false;
+
+let pendingWaitlist = null;
 let recognition = null;
 
 function customerSpeak(text){
