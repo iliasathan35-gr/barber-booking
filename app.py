@@ -1124,5 +1124,58 @@ def admin_add_note():
 
     return redirect(f"/admin/customer/{phone}")
 
+# ---------------- WAITLIST ----------------
+@app.route("/waitlist/add", methods=["POST"])
+def waitlist_add():
+
+    data = request.get_json()
+
+    name = data.get("name")
+    phone = data.get("phone")
+    service = data.get("service")
+    date = data.get("date")
+    time = data.get("time")
+
+    if not all([name, phone, service, date, time]):
+        return jsonify({
+            "success": False
+        })
+
+    # trusted customer
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT COUNT(*)
+        FROM appointments
+        WHERE phone=%s
+    """, (phone,))
+
+    visits = cur.fetchone()[0]
+
+    priority = visits >= 5
+
+    cur.execute("""
+        INSERT INTO waitlist
+        (name, phone, service, date, time, priority)
+        VALUES (%s,%s,%s,%s,%s,%s)
+    """, (
+        name,
+        phone,
+        service,
+        date,
+        time,
+        priority
+    ))
+
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+    return jsonify({
+        "success": True
+    })
+    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
