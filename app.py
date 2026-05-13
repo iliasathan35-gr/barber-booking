@@ -1124,7 +1124,9 @@ banned = False
         customer_name=customer_name,
         phone=phone,
         appointments=appointments,
-        notes=notes
+        notes=notes,
+        priority=priority,
+        banned=banned
     )
 
 # ---------------- ADD CUSTOMER NOTE ----------------
