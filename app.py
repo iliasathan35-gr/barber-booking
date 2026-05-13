@@ -600,9 +600,8 @@ def check_reminders():
 
         time_left = appointment_time - now
 
-        # 4 ώρες πριν λόγω UTC
-        if timedelta(hours=3, minutes=59) <= time_left <= timedelta(hours=4, minutes=1):
-            phone = d.get("phone")
+        # 1 ώρα πριν
+        if timedelta(minutes=59) <= time_left <= timedelta(hours=1, minutes=1):
 
             send_push_to_phone(
                 phone,
