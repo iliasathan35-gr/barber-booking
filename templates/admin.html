@@ -658,6 +658,30 @@ class="btn add-btn"
 </div>
 
 {% endif %}
+
+<script>
+
+async function updateDelay(minutes){
+
+    await fetch("/admin/delay/" + minutes);
+
+    alert(
+        "Ενημερώθηκε η καθυστέρηση"
+    );
+
+}
+
+async function resetDelay(){
+
+    await fetch("/admin/reset-delay");
+
+    alert(
+        "Η καθυστέρηση μηδενίστηκε"
+    );
+
+}
+
+</script>
     
 </body>
 </html>
