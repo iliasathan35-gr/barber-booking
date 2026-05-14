@@ -53,10 +53,10 @@ def load():
     for row in rows:
         data.append({
             "id": row[0],
-            "name": row[0],
-            "phone": row[1],
-            "service": row[2],
-            "time": row[3]
+            "name": row[1],
+            "phone": row[2],
+            "service": row[3],
+            "time": row[4]
         })
 
     return data
